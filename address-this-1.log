@@ -1,0 +1,13 @@
+1116952.016: [GC 1116952.016: [ParNew (promotion failed): 1383424K->2075136K(2075136K), 5.5941360 secs]1116957.611: [CMS1116960.961: [CMS-concurrent-mark: 6.214/11.854 secs] [Times: user=12.86 sys=0.22, real=11.86 secs] 
+ (concurrent mode failure): 4665641K->4012311K(5535744K), 19.0868500 secs] 5420074K->4012311K(7610880K), [CMS Perm : 124024K->124024K(209372K)], 24.6812440 secs] [Times: user=24.76 sys=0.00, real=24.68 secs] 
+1116976.717: [GC [1 CMS-initial-mark: 4012311K(5535744K)] 4042046K(7610880K), 0.0104720 secs] [Times: user=0.01 sys=0.00, real=0.02 secs] 
+1116976.728: [CMS-concurrent-mark-start]
+1116986.957: [CMS1116988.483: [CMS-concurrent-mark: 6.195/11.754 secs] [Times: user=13.83 sys=0.45, real=11.75 secs]
+ (concurrent mode failure): 4592890K->3949854K(5535744K), 16.9354440 secs] 5395735K->3949854K(7610880K), [CMS Perm : 124030K->124027K(209372K)], 22.4445280 secs] [Times: user=22.03 sys=0.00, real=22.45 secs] 
+ (concurrent mode failure): 4609773K->4016863K(5535744K), 18.9026220 secs] 5333278K->4016863K(7610880K), [CMS Perm : 124027K->124027K(209372K)], 24.8411740 secs] [Times: user=24.91 sys=0.00, real=24.84 secs] 
+ (concurrent mode failure): 4645808K->4039754K(5535744K), 18.6848640 secs] 5400287K->4039754K(7610880K), [CMS Perm : 124028K->124028K(209372K)], 24.6655300 secs] [Times: user=24.73 sys=0.00, real=24.66 secs] 
+ (concurrent mode failure): 4658441K->4021549K(5535744K), 19.8326520 secs] 5372910K->4021549K(7610880K), [CMS Perm : 124033K->124033K(209372K)], 25.5833570 secs] [Times: user=25.54 sys=0.00, real=25.59 secs]
+1117116.359: [GC [1 CMS-initial-mark: 4021549K(5535744K)] 4051328K(7610880K), 0.0100830 secs] [Times: user=0.01 sys=0.00, real=0.01 secs] 
+1117116.369: [CMS-concurrent-mark-start]
+
+

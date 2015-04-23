@@ -1,0 +1,68 @@
+#!/bin/bash
+#
+# bash script for running a gc-analyzer
+#
+
+[ -f `dirname $0`/../lib/std.shlib ] && . `dirname $0`/../lib/std.shlib || \
+{ echo `dirname $0`"/../lib/std.shlib not found, gca probably not correctly installed ..." 1>&2; exit 1; }
+
+#
+# shell wrapper debug
+#
+
+debug=false
+
+reldir=`dirname $0`
+
+cygwin=false;
+os=unix
+
+case "`uname`" in
+    CYGWIN*)
+        cygwin=true
+        os=windows
+        sep="\;"
+    ;;
+    Linux)
+        sep=":"
+    ;;
+    Darwin)
+        sep=":"
+    ;;
+esac
+
+if [ "${JAVA_HOME}" = "" ]; then
+    echo "no JAVA_HOME environment variable, set it and try again ..." 1>&2;
+    exit 1
+fi
+
+classpath="${reldir}/../lib${sep}"
+
+for i in `ls ${reldir}/../lib/*.jar`; do
+    ${cygwin} && i=`cygpath -w ${i}`
+    classpath="${classpath}${i}${sep}"
+done
+
+DEBUG_OPTS_SOCKET="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=12348"
+DEBUG_OPTS_SHMEM="-Xrunjdwp:transport=dt_shmem,server=y,suspend=y,address=run"
+
+while [ "$1" != "" ]; do
+    if [ "$1" = "--debug" ]; then
+        if [ "${os}" = "windows" ]; then
+            JAVA_OPTS="${JAVA_OPTS} ${DEBUG_OPTS_SHMEM}"
+        else
+            JAVA_OPTS="${JAVA_OPTS} ${DEBUG_OPTS_SOCKET}"
+        fi
+    elif [ "$1" = "--profile" ]; then
+        PROFILING_OPTS="-agentlib:yjpagent"
+        JAVA_OPTS="${JAVA_OPTS} ${PROFILING_OPTS}"
+    else
+        ARGS="${ARGS} $1"
+    fi
+    shift
+    continue;
+done
+
+debug "${JAVA_HOME}/bin/java ${JAVA_OPTS} -cp \"${classpath}\" com.novaordis.gc.cli.Main ${ARGS}"
+
+${JAVA_HOME}/bin/java ${JAVA_OPTS} -cp "${classpath}" com.novaordis.gc.cli.Main ${ARGS}

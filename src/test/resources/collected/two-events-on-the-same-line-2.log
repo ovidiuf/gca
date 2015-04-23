@@ -1,0 +1,3 @@
+53254.235: [GC 53254.235: [ParNew (promotion failed): 3976407K->4348148K(4373760K), 0.2367350 secs]53254.472: [CMS53258.238: [CMS-concurrent-mark: 5.624/6.197 secs] [Times: user=19.10 sys=0.93, real=6.19 secs]
+  (concurrent mode failure): 10735872K->10161976K(11665408K), 22.5103550 secs] 14282105K->10161976K(16039168K), [CMS Perm : 124935K->117662K(208152K)], 22.7479640 secs] [Times: user=27.41 sys=0.44, real=22.75 secs]
+

@@ -1,0 +1,115 @@
+
+Usage:
+
+    gc-analyzer [-t|--time-origin MM/dd/yy HH:mm:ss,SSS] [global-options] <gc-log-file> [command] [command-arguments]
+
+Commands:
+
+ info - displays a summary of the garbage collection log (this is the default command, and will be implicitly executed if a
+        GC log file is specified, and there is no other command to override it).
+
+ version - displays gc-analyzer version and exits.
+
+ export - exports selected data into a comma separated values file. If no output file is specified. the data will be written at stdout.
+        For each selected entry, the CSV line will start with a millisecond precision timestamp and it will contain a configurable set of
+        fields.
+
+        gc-analyzer [...] <gc-log-file>
+            export \
+            [-o|--output <output-file>] \
+            [-u|--unit <K, M, G>]
+            [-c|--collection-type <all|full, ng, cms-initial-mark, cms-concurrent-mark-start ...>] \
+            [-f|--fields <comma-separated-field-and-expression-list>] \
+
+        The unit is by default M (megabytes) and it can be changed to b (bytes), K (kilobytes) or G (gigabytes).
+
+        The types of the events to be exported can be specified with -c (or --collection-type) as a comma separated list of labels,
+        including "full", "ng". If not specified, the default behavior is to export only the "full" collection event data. If all events
+        are to be exported, use "all".
+
+        All original data from the GC file can be exported by specifying a combination of the following fields. Also, expressions involving
+        the following fields are allowed. Timestamp will be always included and will be the first field of the line. The order in which the
+        fields (or the expressions involving fields) are specified will be maintained:
+
+            offset
+
+            collection-type
+
+            duration
+
+            ng-before
+
+            ng-after
+
+            ng
+
+            ng-capacity
+
+            og-before
+
+            og-after
+
+            og
+
+            og-capacity
+
+            heap-before
+
+            heap-after
+
+            heap
+
+            heap-capacity
+
+            pg-before
+
+            pg-after
+
+            pg
+
+            pg-capacity
+
+
+        Example:
+
+                gc-analyzer ./gc.29-Dec-11-0808 export
+
+                gc-analyzer ./gc.29-Dec-11-0808 export --output /tmp/test.csv
+
+                gc-analyzer ./gc.29-Dec-11-0808 export -c full -f offset, type, duration, og-capacity, og-after, og-after/og-capacity*100
+
+
+The Time Origin
+
+    The time origin can be specified with -t|--time-origin in the MM/dd/yy HH:mm:ss,SSS format (April 19 2013 11:01:00,000 PM is specified
+    as 04/19/13 23:01:00,000) or it can be inferred from the name of the GC log file being analyzed, if the file name matches specific
+    patters. Example of supported patterns:
+
+    *.29-Dec-11-0808          (time origin will be initialized to 12/29/11 8:08:00 AM)
+    *.29-Dec-11-220344        (time origin will be initialized to 12/29/11 10:03:44 PM)
+    *.08-28-2013_13-14-31
+    *.log-08-28-2013_13-14-31
+
+        Example:
+
+                gc-analyzer -t 12/29/11 10:04:44,000 ./gc.log info
+
+    For more details, see the "Time Origin" section of the User Manual.
+
+Global Options
+
+    --suppress-timestamp-warning - if PrintGCDateStamps was used when generating the GC logs (so the full timestamps are present) and
+                the time origin information was specified, it is possible and actually very likely that a difference exists between
+                the recorded timestamps and calculated timestamps, mainly because the origin is not usually specified with millisecond
+                precision. If such a difference is detected, gca will warn on stdout. In order to suppress the warnings, use the
+                --suppress-timestamp-warning global option.
+
+Expressions
+
+    It is important NOT to use space between an expression's elements. "og-after/og-capacity*100" is correct, "og-after / og-capacity * 100"
+    is not.
+
+    As per current version, expressions are not fully implemented, so some may work and some may not.
+
+
+
