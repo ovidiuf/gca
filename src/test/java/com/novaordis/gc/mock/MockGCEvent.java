@@ -80,12 +80,6 @@ public class MockGCEvent implements GCEvent
         return null;
     }
 
-    @Override
-    public String getNextEventRenderingOnTheSameLine()
-    {
-        return null;
-    }
-
     // Public ----------------------------------------------------------------------------------------------------------
 
     public String getLine()

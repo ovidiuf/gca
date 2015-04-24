@@ -52,11 +52,13 @@ public class TwoEventsOnTheSameLineTest extends Assert
 
         assertEquals(2, events.size());
 
+        // 2014-08-14T01:12:28.621-0700: 27036.837: [GC2014-08-14T01:12:28.622-0700: 27036.837: [ParNew (promotion failed): 471872K->471872K(471872K), 0.3931530 secs]
+
         NewGenerationCollection e = (NewGenerationCollection)events.get(0);
 
         assertEquals(27036837L, e.getOffset());
+
         Field f = e.get(FieldType.NOTES);
-        assertNotNull(f);
         assertEquals("promotion failed", f.getValue());
 
         f = e.get(FieldType.NG_BEFORE);
@@ -67,6 +69,9 @@ public class TwoEventsOnTheSameLineTest extends Assert
 
         f = e.get(FieldType.NG_CAPACITY);
         assertEquals(471872L * 1024, f.getValue());
+
+        f = e.get(FieldType.DURATION);
+        assertEquals(393L, f.getValue());
 
         CMSConcurrentPreclean e2 = (CMSConcurrentPreclean)events.get(1);
         assertNotNull(e2);

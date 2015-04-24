@@ -96,7 +96,7 @@ public class LinearScanParser implements GCLogParser
         {
             br = new BufferedReader(reader);
 
-            String event;
+            String events;
             String readAheadLine;
             String currentLine = null;
             boolean done = false;
@@ -126,7 +126,8 @@ public class LinearScanParser implements GCLogParser
                     if (isTheSecondLineOfTheEvent(readAheadLine))
                     {
                         // this detects a currently unsupported pattern of more than two-line multi-line events
-                        throw new UserErrorException("multi-line events with more than two lines not supported at this time, line " + lineNumber);
+                        throw new UserErrorException(
+                            "multi-line events with more than two lines not supported at this time, line " + lineNumber);
                     }
                     currentLine = readAheadLine;
                     lineNumber ++;
@@ -135,12 +136,12 @@ public class LinearScanParser implements GCLogParser
 
                 if (isTheSecondLineOfTheEvent(readAheadLine))
                 {
-                    event = currentLine + readAheadLine;
+                    events = currentLine + readAheadLine;
                     currentLine = null;
                 }
                 else
                 {
-                    event = currentLine;
+                    events = currentLine;
                     currentLine = readAheadLine;
                 }
 
@@ -152,7 +153,7 @@ public class LinearScanParser implements GCLogParser
 
                 try
                 {
-                    processEvent(event, lineNumber++, timeOrigin, gcEvents, processorPipeline, gcFile, suppressTimestampWarning);
+                    processLine(events, lineNumber++, timeOrigin, gcEvents, processorPipeline, gcFile, suppressTimestampWarning);
                 }
                 catch(ParserException e)
                 {
@@ -186,7 +187,12 @@ public class LinearScanParser implements GCLogParser
 
     public void installDefaultPipeline()
     {
-        installPipeline(new NewGenerationCollectionParser(), new FullCollectionParser(), new CMSParser(), new ShutdownParser());
+        // place the CMS parser on the first position in line, to pick the CMS events that start with [GS ...
+        installPipeline(
+            new CMSParser(),
+            new NewGenerationCollectionParser(),
+            new FullCollectionParser(),
+            new ShutdownParser());
     }
 
     public void addSecondLinePattern(Pattern p)
@@ -275,16 +281,15 @@ public class LinearScanParser implements GCLogParser
     // Private ---------------------------------------------------------------------------------------------------------
 
     /**
-     * Either adds a new GC event at the end of the list or modifies an existing event, by adding more information to
-     * it.
+     * Parse a line, which may contain multiple GC events.
      *
      * @param gcFile for reporting purposes only, it can be null.
      *
      * @throws Exception
      */
-    private static void processEvent(String line, long lineNumber, Long timeOrigin,
-                                     List<GCEvent> events, GCEventParser processorPipeline,
-                                     File gcFile, boolean suppressTimestampWarning) throws Exception
+    private static void processLine(String line, long lineNumber, Long timeOrigin,
+                                    List<GCEvent> events, GCEventParser processorPipeline,
+                                    File gcFile, boolean suppressTimestampWarning) throws Exception
     {
         if (line == null)
         {
@@ -292,77 +297,77 @@ public class LinearScanParser implements GCLogParser
             return;
         }
 
-
         if (events == null)
         {
             throw new IllegalArgumentException("null events list");
         }
 
-        // 5.268: [Full GC (System) [PSYoungGen: 72810K->0K(1835008K)] [PSOldGen: 0K->72190K(4194304K)] 72810K->72190K(6029312K) [PSPermGen: 29283K->29283K(59136K)], 0.2507000 secs] [Times: user=0.24 sys=0.01, real=0.25 secs]
-        //
-        // or
-        //
-        // 2013-10-10T14:33:21.747-0500: 7.954: [Full GC 7.954: [CMS: 0K->16259K(2516608K), 0.3846450 secs] 238663K->16259K(3145152K), [CMS Perm : 21247K->21233K(21248K)], 0.3848730 secs] [Times: user=0.34 sys=0.05, real=0.39 secs]
-        //
-        // or
-        //
-        //
-        // Heap
-        //  PSYoungGen      total 1926336K, used 1370287K [0x0000000780000000, 0x0000000800000000, 0x0000000800000000)
-        //  ...
+        // identify timestamps and break the line in pieces so each of the piece starts with a timestamp;
+        // this is necessary because sometimes we encounter more than one timestamped event per line
 
-        // strip off time stamp
+        int from = 0;
 
-        Timestamp ts = null;
-
-        int i = line.indexOf(": ");
-
-        if (i != -1)
+        while(from < line.length())
         {
-            // look for offset, but not if we have a [.. between i and i2
-            int i2 = line.indexOf(": ", i + 2);
+            int fragmentStart, fragmentEnd;
 
-            if (i2 != -1 &&
-                line.charAt(i2 - 1) >= '0' &&
-                line.charAt(i2 - 1) <= '9' &&
-                (line.indexOf('[', i) == -1 ||
-                    line.indexOf('[', i) > i2))
+            Timestamp ts = Timestamp.find(line, from, lineNumber);
+            Timestamp ts2 = null;
+
+            if (ts == null)
             {
-                i = i2;
+                fragmentStart = from;
+            }
+            else
+            {
+                // adjust time (if necessary)
+                ts.applyTimeOrigin(timeOrigin);
+
+                fragmentStart = ts.getEndPosition();
+                ts2 = Timestamp.find(line, ts.getEndPosition(), lineNumber);
             }
 
-            // explicit timestamp and/or offset identified
-            String s = line.substring(0, i);
-
-            if (Timestamp.isTimestamp(s))
+            if (ts2 != null)
             {
-                ts = new Timestamp(s, timeOrigin, gcFile, suppressTimestampWarning);
-                line = line.substring(i + ": ".length()).trim();
+                // adjust time (if necessary)
+                ts2.applyTimeOrigin(timeOrigin);
+
+                // multiple events on the same line
+                fragmentEnd = ts2.getStartPosition();
+            }
+            else
+            {
+                // no more events on this line
+                fragmentEnd = line.length();
             }
 
-            // it is fine to leave timestamp un-initialized in certain conditions, there are timestamp-less lines that
-            // contain ":", for example "CMS: abort preclean due to time ...". Simply leave the timestamp
-            // non-initialized and pass the line to the processor pipeline - if we find a processor for it, the
-            // processor will know what to do with it.
+            String eventFragment = line.substring(fragmentStart, fragmentEnd);
+
+            parseEvent(ts, eventFragment, events, timeOrigin, processorPipeline, gcFile, suppressTimestampWarning, lineNumber);
+
+            from = fragmentEnd;
         }
+    }
 
-        if (ts == null && !events.isEmpty())
-        {
-            // assign an estimated timestamp, use the last event timestamp, it will be overridden later if necessary
-            GCEvent last = events.get(events.size() - 1);
-            ts = new Timestamp(last.getTime(), last.getOffset());
-        }
-
-        // some GC events (such as SHUTDOWN) do not have a timestamp, so a null ts is legal
-
-        // look up an appropriate parser - it's either one from the processing pipeline or the parser associated with
-        // the last event, in the case of a multi-line event
+    /**
+     * Extracts the event from the given fragment. Either add a new GC event at the end of the list or modify an
+     * existing event, by adding more information to it.
+     *
+     * @param ts - the timestamp. Some GC events (such as SHUTDOWN) do not have a timestamp, so a null ts is legal.
+     * @param eventFragment - guaranteed to contain data for a <b>single</b> GC event. If we identify a timestamp
+     *                      in it, then there's something is wrong.
+     */
+    private static void parseEvent(Timestamp ts, String eventFragment, List<GCEvent> events, Long timeOrigin,
+                                   GCEventParser processorPipeline, File gcFile, boolean suppressTimestampWarning,
+                                   long lineNumber) throws Exception
+    {
+        // look up an appropriate parser - it's either one from the processing pipeline or the parser associated
+        // with the last event, in the case of a multi-line event
 
         GCEvent crtEvent;
         GCEventParser crtParser;
 
-        if (events.isEmpty() ||
-            ((crtParser = (crtEvent = events.get(events.size() - 1)).getActiveParser()) == null))
+        if (events.isEmpty() || ((crtParser = (crtEvent = events.get(events.size() - 1)).getActiveParser()) == null))
         {
             // no active parser associated with the last event, nullify the "current event" and use the pipeline for
             // parsing
@@ -372,19 +377,17 @@ public class LinearScanParser implements GCLogParser
 
         while (crtParser != null)
         {
-            GCEvent event = crtParser.parse(ts, line, lineNumber, crtEvent, gcFile);
+            GCEvent event = crtParser.parse(ts, eventFragment, lineNumber, crtEvent, gcFile);
 
             if (event != null)
             {
                 // add it, unless it is already there
+
                 if (!event.equals(crtEvent))
                 {
                     events.add(event);
                 }
 
-                // if there is "line" left, it means there are more then one event per line, so recursively parse them
-                String lineLeft = event.getNextEventRenderingOnTheSameLine();
-                processEvent(lineLeft, lineNumber, timeOrigin, events, processorPipeline, gcFile, suppressTimestampWarning);
                 return;
             }
             else
@@ -394,12 +397,10 @@ public class LinearScanParser implements GCLogParser
             }
         }
 
-        // if we reached the bottom of the GCEventParser pipeline, we don't know how to parse this log entry, bail out
-        log.warn("don't know to parse line " + lineNumber + ": \"" + line + "\"");
+        // we reached the bottom of the GCEventParser pipeline,  we weren't able to find any event in the fragment,
+        // we don't know how to parse this log entry, bail out
+        log.warn("don't know to parse line " + lineNumber + ", fragment \"" + eventFragment + "\"");
     }
 
     // Inner classes ---------------------------------------------------------------------------------------------------
 }
-
-
-

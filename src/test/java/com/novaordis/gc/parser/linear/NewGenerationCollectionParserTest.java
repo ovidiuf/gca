@@ -239,9 +239,6 @@ public class NewGenerationCollectionParserTest extends Assert
         assertEquals(0L, e.getDuration(), 0.0001);
 
         assertEquals("promotion failed", e.get(FieldType.NOTES).getValue());
-
-        assertEquals("2014-08-14T01:12:29.015-0700: 27037.231: [CMS2014-08-14T01:12:29.867-0700: 27038.083: [CMS-concurrent-preclean: 4.167/17.484 secs] [Times: user=21.55 sys=2.82, real=17.48 secs]",
-                    e.getNextEventRenderingOnTheSameLine());
     }
 
     @Test

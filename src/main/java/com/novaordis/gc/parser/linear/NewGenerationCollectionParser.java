@@ -4,6 +4,7 @@ import com.novaordis.gc.model.Timestamp;
 import com.novaordis.gc.model.event.GCEvent;
 import com.novaordis.gc.model.event.NewGenerationCollection;
 import com.novaordis.gc.parser.BeforeAfterMax;
+import com.novaordis.gc.parser.Duration;
 import com.novaordis.gc.parser.GCEventParserBase;
 import com.novaordis.gc.parser.ParserException;
 import org.apache.log4j.Logger;
@@ -20,17 +21,17 @@ import java.util.List;
  */
 public class NewGenerationCollectionParser extends GCEventParserBase
 {
-    // Constants ---------------------------------------------------------------------------------------------------------------------------
+    // Constants -------------------------------------------------------------------------------------------------------
 
     private static final Logger log = Logger.getLogger(NewGenerationCollectionParser.class);
 
-    // Static ------------------------------------------------------------------------------------------------------------------------------
+    // Static ----------------------------------------------------------------------------------------------------------
 
-    // Attributes --------------------------------------------------------------------------------------------------------------------------
+    // Attributes ------------------------------------------------------------------------------------------------------
 
-    // Constructors ------------------------------------------------------------------------------------------------------------------------
+    // Constructors ----------------------------------------------------------------------------------------------------
 
-    // GCEventParser -----------------------------------------------------------------------------------------------------------------------
+    // GCEventParser ---------------------------------------------------------------------------------------------------
 
     /**
      * Example of recognized line:
@@ -66,26 +67,6 @@ public class NewGenerationCollectionParser extends GCEventParserBase
                 return null;
             }
 
-            String nextEventOnTheSameLine = null;
-
-            // look for multiple events on the same line, start the search after the next "[". We start from
-            // there to avoid situations where the timestamp is glued to "GC", like here:
-            //   [GC2014-08-14T01:53:16.892-0700: 29485.108: [ParNew: ...
-            //   [GC 53233.950: [ParNew: ...
-            //   [GC2014-08-14T08:38:27.033-0700: 53795.248: [ParNew: ...
-
-            int i = line.indexOf('[', 1);
-            i = i == -1 ? "[GC".length() + 2 : i;
-            Timestamp nextTs = Timestamp.find(line, i);
-
-            if (nextTs != null)
-            {
-                // we do have multiple events
-                int nextEventIndex = nextTs.getStartPosition();
-                nextEventOnTheSameLine = line.substring(nextEventIndex);
-                line = line.substring(0, nextEventIndex);
-            }
-
             List<String> tokens = LineUtil.toSquareBracketTokens(line, lineNumber);
 
             // only use the first token, go down one level
@@ -99,19 +80,6 @@ public class NewGenerationCollectionParser extends GCEventParserBase
             {
                 // for CMS collector lines, verify that line start offset precedes embedded offset
                 hs = hs.replaceFirst("GC +", "");
-                hs = hs.substring(0, hs.length() - 1);
-                Timestamp embedded = new Timestamp(hs, 0L, gcFile, false);
-
-                if (ts.getOffset() > embedded.getOffset())
-                {
-                    throw new Exception("embedded offset " + hs + " precedes line start offset " + ts.getLiteral());
-                }
-            }
-            else if ((nextTs = Timestamp.find(hs, 0)) != null)
-            {
-                // for CMS new generation collections where PrintGCDateStamps was specified verify that line start
-                // offset precedes embedded offset
-                hs = hs.substring(nextTs.getEndPosition() + 1).trim();
                 hs = hs.substring(0, hs.length() - 1);
                 Timestamp embedded = new Timestamp(hs, 0L, gcFile, false);
 
@@ -156,10 +124,16 @@ public class NewGenerationCollectionParser extends GCEventParserBase
                     throw new Exception("unknown CMS new generation line: \"" + line + "\"");
                 }
 
-                // TODO -  we're discarding a duration here, not sure what that represents
+                // introduce duration back into the token list so we can process it with the standard code
+                String duration = ngs.substring(ngs.indexOf(',') + 1).trim();
+                // fill for heap
+                tokens.add(null);
+                // then add duration
+                tokens.add(duration);
+
                 ngs = ngs.replaceFirst(",.*", "");
             }
-            else if (line.contains("CMS") || line.contains("YG occupancy"))
+            else if (line.contains("YG occupancy"))
             {
                 // TODO this discards a lot of cases - address
                 return null;
@@ -168,7 +142,6 @@ public class NewGenerationCollectionParser extends GCEventParserBase
             {
                 throw new Exception("expecting \"PSYoungGen:|ParNew ...\" and got \"" + ngs + "\"");
             }
-
 
             BeforeAfterMax ng = new BeforeAfterMax(ngs, lineNumber);
             BeforeAfterMax heap = null;
@@ -182,30 +155,24 @@ public class NewGenerationCollectionParser extends GCEventParserBase
             if (tokens.size() > 2)
             {
                 String heaps = tokens.get(2);
-                heap = new BeforeAfterMax(heaps, lineNumber);
 
+                if (heaps != null)
+                {
+                    heap = new BeforeAfterMax(heaps, lineNumber);
+                }
+            }
+
+            if (tokens.size() > 3)
+            {
                 //
                 // duration
                 //
 
-                String durations = tokens.get(3);
-                int j = durations.indexOf(",");
-                if (j != -1)
-                {
-                    durations = durations.substring(j + 1);
-                }
-                j = durations.indexOf("secs");
-                if (j != -1)
-                {
-                    durations = durations.substring(0, j);
-                }
-                durations = durations.trim();
-
-                duration = Math.round(Float.parseFloat(durations) * 1000);
+                String durationString = tokens.get(3);
+                duration = Duration.toLongMilliseconds(durationString, lineNumber);
             }
 
-            NewGenerationCollection event =
-                new NewGenerationCollection(ts, duration, ng, heap, notes, nextEventOnTheSameLine);
+            NewGenerationCollection event = new NewGenerationCollection(ts, duration, ng, heap, notes);
 
             log.debug(event);
             return event;
@@ -218,15 +185,15 @@ public class NewGenerationCollectionParser extends GCEventParserBase
         }
     }
 
-    // Public ------------------------------------------------------------------------------------------------------------------------------
+    // Public ----------------------------------------------------------------------------------------------------------
 
-    // Package protected -------------------------------------------------------------------------------------------------------------------
+    // Package protected -----------------------------------------------------------------------------------------------
 
-    // Protected ---------------------------------------------------------------------------------------------------------------------------
+    // Protected -------------------------------------------------------------------------------------------------------
 
-    // Private -----------------------------------------------------------------------------------------------------------------------------
+    // Private ---------------------------------------------------------------------------------------------------------
 
-    // Inner classes -----------------------------------------------------------------------------------------------------------------------
+    // Inner classes ---------------------------------------------------------------------------------------------------
 }
 
 

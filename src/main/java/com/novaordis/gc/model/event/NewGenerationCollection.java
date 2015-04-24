@@ -30,13 +30,7 @@ public class NewGenerationCollection extends GCEventBase
 
     public NewGenerationCollection(Timestamp ts, long duration, BeforeAfterMax ng, BeforeAfterMax heap, String notes)
     {
-        this(ts, duration, ng, heap, notes, null); // no event on the same line
-    }
-
-    public NewGenerationCollection(Timestamp ts, long duration, BeforeAfterMax ng, BeforeAfterMax heap,
-                                   String notes, String nextEventOnTheSameLine)
-    {
-        super(ts, duration, notes, nextEventOnTheSameLine);
+        super(ts, duration, notes);
 
         setCollectionType(CollectionType.NEW_GENERATION_COLLECTION);
 

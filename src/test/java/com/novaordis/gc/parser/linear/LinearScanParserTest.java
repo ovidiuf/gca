@@ -10,6 +10,8 @@ import com.novaordis.gc.model.event.FullCollection;
 import com.novaordis.gc.model.event.GCEvent;
 import com.novaordis.gc.model.event.NewGenerationCollection;
 import com.novaordis.gc.parser.GCEventParser;
+import com.novaordis.gc.parser.GCLogParser;
+import com.novaordis.gc.parser.GCLogParserFactory;
 import com.novaordis.gc.parser.linear.cms.CMSParser;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
@@ -50,8 +52,8 @@ public class LinearScanParserTest extends Assert
 
         Reader r = new InputStreamReader(new ByteArrayInputStream(s.getBytes()));
 
-        LinearScanParser p = new LinearScanParser(r, null, false);
-        p.installDefaultPipeline();
+        GCLogParser p = GCLogParserFactory.getParser(r);
+        assertTrue(p instanceof LinearScanParser);
 
         List<GCEvent> events = p.parse(1000L);
 
@@ -97,8 +99,8 @@ public class LinearScanParserTest extends Assert
 
         Reader r = new InputStreamReader(new ByteArrayInputStream(s.getBytes()));
 
-        LinearScanParser p = new LinearScanParser(r, null, false);
-        p.installDefaultPipeline();
+        GCLogParser p = GCLogParserFactory.getParser(r);
+        assertTrue(p instanceof LinearScanParser);
 
         List<GCEvent> events = p.parse(1000L);
 
@@ -148,8 +150,8 @@ public class LinearScanParserTest extends Assert
         MockReader r = new MockReader(
             "4.751: [GC [PSYoungGen: 660640K->72890K(1835008K)] 660640K->72890K(6029312K), 0.0515050 secs] [Times: user=0.21 sys=0.09, real=0.05 secs]");
 
-        LinearScanParser p = new LinearScanParser(r, null, false);
-        p.installDefaultPipeline();
+        GCLogParser p = GCLogParserFactory.getParser(r);
+        assertTrue(p instanceof LinearScanParser);
 
         List<GCEvent> events = p.parse(0L);
 
@@ -164,9 +166,8 @@ public class LinearScanParserTest extends Assert
         MockReader r = new MockReader(
             " CMS: abort preclean due to time 29.020: [CMS-concurrent-abortable-preclean: 4.456/5.072 secs] [Times: user=8.52 sys=0.09, real=5.07 secs] ");
 
-        // empty pipeline parser
-        LinearScanParser p = new LinearScanParser(r, null, false);
-        p.installDefaultPipeline();
+        GCLogParser p = GCLogParserFactory.getParser(r);
+        assertTrue(p instanceof LinearScanParser);
 
         List<GCEvent> events = p.parse(0L);
 
@@ -176,9 +177,7 @@ public class LinearScanParserTest extends Assert
         assertEquals(0, events.size());
     }
 
-    //
-    // pipeline installation tests
-    //
+    // pipeline installation tests -------------------------------------------------------------------------------------
 
     @Test
     public void installEmptyPipeline() throws Exception
@@ -270,13 +269,14 @@ public class LinearScanParserTest extends Assert
         p.installDefaultPipeline();
 
         GCEventParser ep = p.getPipeline();
+
+        assertTrue(ep instanceof CMSParser);
+
+        ep = ep.getNext();
         assertTrue(ep instanceof NewGenerationCollectionParser);
 
         ep = ep.getNext();
         assertTrue(ep instanceof FullCollectionParser);
-
-        ep = ep.getNext();
-        assertTrue(ep instanceof CMSParser);
 
         ep = ep.getNext();
         assertTrue(ep instanceof ShutdownParser);

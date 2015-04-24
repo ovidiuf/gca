@@ -1,10 +1,5 @@
-package com.novaordis.gc.parser.linear.cms;
+package com.novaordis.gc.parser;
 
-import com.novaordis.gc.model.Field;
-import com.novaordis.gc.model.FieldType;
-import com.novaordis.gc.model.Timestamp;
-import com.novaordis.gc.model.event.cms.CMSConcurrentMarkStart;
-import com.novaordis.gc.model.event.cms.CMSInitialMark;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,11 +9,11 @@ import org.junit.Test;
  *
  * Copyright 2013 Nova Ordis LLC
  */
-public class CMSParserTest extends Assert
+public class DurationTest extends Assert
 {
     // Constants -------------------------------------------------------------------------------------------------------
 
-    private static final Logger log = Logger.getLogger(CMSParserTest.class);
+    private static final Logger log = Logger.getLogger(DurationTest.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -28,32 +23,26 @@ public class CMSParserTest extends Assert
 
     // Public ----------------------------------------------------------------------------------------------------------
 
-    // CMS-concurrent-mark-start tests ---------------------------------------------------------------------------------
-
     @Test
-    public void concurrentMarkStart() throws Exception
+    public void testDuration() throws Exception
     {
-        String line = "[CMS-concurrent-mark-start]";
-
-        CMSParser p = new CMSParser();
-
-        Timestamp ts = new Timestamp(0L, 1L);
-
-        CMSConcurrentMarkStart cms = (CMSConcurrentMarkStart)p.parse(ts, line, -1, null, null);
-
-        assertNotNull(cms);
-        assertEquals(1L, cms.getOffset());
-        assertEquals(0L, cms.getDuration());
-
-        log.debug(".");
+        long ms = Duration.toLongMilliseconds("0.2210670 secs", -1L);
+        assertEquals(221L, ms);
     }
 
-    // two events on the same line, the second is CMS ------------------------------------------------------------------
-
     @Test
-    public void secondEventOnLine_CMSConcurrentPreclean() throws Exception
+    public void weOnlyHandleSecs() throws Exception
     {
-        String line = "[CMS2014-08-14T01:12:29.867-0700: 27038.083: [CMS-concurrent-preclean: 4.167/17.484 secs] [Times: user=21.55 sys=2.82, real=17.48 secs]";
+        try
+        {
+            Duration.toLongMilliseconds("0.2210670 years", 7L);
+            fail("should have failed because we only handle 'secs'");
+        }
+        catch(ParserException e)
+        {
+            log.info(e.getMessage());
+            assertEquals(7L, e.getLineNumber());
+        }
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

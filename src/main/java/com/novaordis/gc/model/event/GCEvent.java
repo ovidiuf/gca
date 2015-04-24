@@ -50,11 +50,4 @@ public interface GCEvent
      */
     GCEventParser getActiveParser();
 
-    /**
-     * Contains the string with the next event found on the same line - sometimes the garbage collector does not log
-     * events on a new line but cuts short the current event's line and appends a new event on the same line.
-     * May return null
-     */
-    String getNextEventRenderingOnTheSameLine();
-
 }

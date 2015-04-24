@@ -29,14 +29,15 @@ public class NewGenerationCollectionTest extends GCEventTest
     @Test
     public void testNGConstructor() throws Exception
     {
-        Timestamp ts = new Timestamp("1.000", 0L, null, false);
+        Timestamp ts = new Timestamp("2014-08-14T01:12:28.621-0700 27036.837", 1408003948621L, 27036837L, 0, 41);
+
         BeforeAfterMax ng = new BeforeAfterMax("2K->1K(3K)", -1L);
         BeforeAfterMax heap = new BeforeAfterMax("20K->10K(30K)", -1L);
 
         NewGenerationCollection e = new NewGenerationCollection(ts, 1L, ng, heap);
 
-        assertEquals(1000L, e.getTime());
-        assertEquals(1000L, e.getOffset());
+        assertEquals(1408003948621L, e.getTime());
+        assertEquals(27036837L, e.getOffset());
         assertEquals(1L, e.getDuration());
 
         assertEquals(2048L, e.get(FieldType.NG_BEFORE).getValue());

@@ -29,8 +29,6 @@ public abstract class GCEventBase implements GCEvent
 
     private Map<FieldType, Field> fields;
 
-    private String nextEventOnTheSameLine;
-
     // Constructors ----------------------------------------------------------------------------------------------------
 
     protected GCEventBase(Timestamp ts, long duration)
@@ -40,13 +38,15 @@ public abstract class GCEventBase implements GCEvent
 
     protected GCEventBase(Timestamp ts, long duration, String notes)
     {
-        this(ts, duration, notes, null); // no event on the same line
-    }
+        long timeValue = ts.getTime() == null ? -1L : ts.getTime();
+        this.time = new Field(FieldType.TIME, timeValue);
 
-    protected GCEventBase(Timestamp ts, long duration, String notes, String nextEventOnTheSameLine)
-    {
-        this.time = new Field(FieldType.TIME, ts.getTime());
-        this.offset = new Field(FieldType.OFFSET, ts.getLiteral());
+        String offsetLiteral = ts.getOffsetLiteral();
+        if (offsetLiteral != null)
+        {
+            this.offset = new Field(FieldType.OFFSET, offsetLiteral);
+        }
+
         this.duration = new Field(FieldType.DURATION, duration);
 
         this.fields = new HashMap<FieldType, Field>();
@@ -55,8 +55,6 @@ public abstract class GCEventBase implements GCEvent
         {
             fields.put(FieldType.NOTES, new Field(FieldType.NOTES, notes));
         }
-
-        this.nextEventOnTheSameLine = nextEventOnTheSameLine;
     }
 
     // GCEvent overrides -----------------------------------------------------------------------------------------------
@@ -91,7 +89,7 @@ public abstract class GCEventBase implements GCEvent
 
         try
         {
-            return Timestamp.offsetToMilliseconds(s);
+            return Timestamp.offsetToLong(s, null);
         }
         catch(Exception e)
         {
@@ -138,12 +136,6 @@ public abstract class GCEventBase implements GCEvent
         return null;
     }
 
-    @Override
-    public String getNextEventRenderingOnTheSameLine()
-    {
-        return nextEventOnTheSameLine;
-    }
-
     // Public ------------------------------------------------------------------------------------------------------------------------------
 
     // Package protected -------------------------------------------------------------------------------------------------------------------
@@ -164,11 +156,6 @@ public abstract class GCEventBase implements GCEvent
     protected void setCollectionType(CollectionType ct)
     {
         this.collectionType = new Field(FieldType.COLLECTION_TYPE, ct);
-    }
-
-    protected void setNextEventOnTheSameLine(String s)
-    {
-        this.nextEventOnTheSameLine = s;
     }
 
     // Private -----------------------------------------------------------------------------------------------------------------------------

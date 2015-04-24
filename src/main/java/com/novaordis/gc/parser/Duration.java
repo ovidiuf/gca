@@ -1,52 +1,42 @@
 package com.novaordis.gc.parser;
 
-import com.novaordis.gc.parser.linear.LinearScanParser;
-import org.apache.log4j.Logger;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.Reader;
-import java.util.regex.Pattern;
-
 /**
+ * Static utility that converts "0.2210670 secs" into duration information (long milliseconds)
+ *
  * @author <a href="mailto:ovidiu@novaordis.com">Ovidiu Feodorov</a>
  *
- * Copyright 2013 Nova Ordis LLC
+ *  Copyright 2013 Nova Ordis LLC
  */
-public class GCLogParserFactory
+public class Duration
 {
     // Constants -------------------------------------------------------------------------------------------------------
 
-    private static final Logger log = Logger.getLogger(GCLogParserFactory.class);
-
     // Static ----------------------------------------------------------------------------------------------------------
 
-    public static GCLogParser getParser(Reader r) throws Exception
+    /**
+     * Static utility that converts "0.2210670 secs" into duration information (long milliseconds), performing all
+     * necessary rounding.
+     *
+     * @throws ParserException
+     */
+    public static long toLongMilliseconds(String s, long lineNumber) throws ParserException
     {
-        return getParser(r, null, false);
-    }
+        // we currently only handle 'secs', everything else is handled as a parsing error
 
-    public static GCLogParser getParser(File f, boolean suppressTimestampWarning) throws Exception
-    {
-        FileReader r = new FileReader(f);
-        return getParser(r, f, suppressTimestampWarning);
-    }
+        if (!s.endsWith(" secs"))
+        {
+            throw new ParserException("we can only handle 'secs', but we got \"" + s + "\"", lineNumber);
+        }
 
-    public static GCLogParser getParser(Reader r, File f, boolean suppressTimestampWarning) throws Exception
-    {
-        LinearScanParser p = new LinearScanParser(r, f, suppressTimestampWarning);
-        p.installDefaultPipeline();
-        p.addSecondLinePattern(Pattern.compile("\\s*\\(concurrent mode failure\\).*"));
-        return p;
+        s = s.substring(0, s.length() - " secs".length()).trim();
+        //noinspection UnnecessaryLocalVariable
+        long duration = Math.round(Float.parseFloat(s) * 1000);
+        return duration;
     }
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
     // Constructors ----------------------------------------------------------------------------------------------------
-
-    private GCLogParserFactory()
-    {
-    }
 
     // Public ----------------------------------------------------------------------------------------------------------
 
