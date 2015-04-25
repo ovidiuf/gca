@@ -3,14 +3,20 @@ package com.novaordis.gc.collected;
 import com.novaordis.gc.model.Field;
 import com.novaordis.gc.model.FieldType;
 import com.novaordis.gc.model.event.*;
+import com.novaordis.gc.parser.GCLogParser;
+import com.novaordis.gc.parser.GCLogParserFactory;
 import com.novaordis.gc.parser.linear.LinearScanParser;
 import org.apache.log4j.Logger;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * A real abbreviated gc log
@@ -19,7 +25,7 @@ import java.util.List;
  *
  * Copyright 2013 Nova Ordis LLC
  */
-public class CompleteEventSampleTest extends Assert
+public class CompleteEventSampleTest
 {
     // Constants ---------------------------------------------------------------------------------------------------------------------------
 
@@ -41,8 +47,8 @@ public class CompleteEventSampleTest extends Assert
 
         InputStreamReader isr = new InputStreamReader(is);
 
-        LinearScanParser p = new LinearScanParser(isr, null, false);
-        p.installDefaultPipeline();
+        GCLogParser p = GCLogParserFactory.getParser(isr);
+        assertTrue(p instanceof LinearScanParser);
 
         List<GCEvent> events = p.parse(0L);
 
@@ -55,7 +61,7 @@ public class CompleteEventSampleTest extends Assert
         nc = (NewGenerationCollection)events.get(0);
 
         assertEquals(76L, nc.getDuration());
-        assertEquals(4911L, nc.getOffset());
+        assertEquals(4911L, nc.getOffset().longValue());
 
         f = nc.get(FieldType.NG_BEFORE);
         assertEquals(1024L * 660688, ((Long)f.getValue()).longValue());
@@ -74,15 +80,17 @@ public class CompleteEventSampleTest extends Assert
         fc = (FullCollection)events.get(1);
 
         assertEquals(244L, fc.getDuration());
-        assertEquals(4987L, fc.getOffset());
+        assertEquals(4987L, fc.getOffset().longValue());
 
         f = fc.get(FieldType.NG_BEFORE);
         assertEquals(1024L * 72899, ((Long)f.getValue()).longValue());
         f = fc.get(FieldType.NG_AFTER);
+        //noinspection PointlessArithmeticExpression
         assertEquals(1024L * 0, ((Long)f.getValue()).longValue());
         f = fc.get(FieldType.NG_CAPACITY);
         assertEquals(1024L * 1835008, ((Long)f.getValue()).longValue());
         f = fc.get(FieldType.OG_BEFORE);
+        //noinspection PointlessArithmeticExpression
         assertEquals(1024L * 0, ((Long)f.getValue()).longValue());
         f = fc.get(FieldType.OG_AFTER);
         assertEquals(1024L * 72243, ((Long)f.getValue()).longValue());
@@ -104,7 +112,7 @@ public class CompleteEventSampleTest extends Assert
         nc = (NewGenerationCollection)events.get(2);
 
         assertEquals(171L, nc.getDuration());
-        assertEquals(11645L, nc.getOffset());
+        assertEquals(11645L, nc.getOffset().longValue());
 
         f = nc.get(FieldType.NG_BEFORE);
         assertEquals(1024L * 1572864, ((Long)f.getValue()).longValue());
@@ -123,11 +131,12 @@ public class CompleteEventSampleTest extends Assert
         fc = (FullCollection)events.get(3);
 
         assertEquals(2662L, fc.getDuration());
-        assertEquals(3605261L, fc.getOffset());
+        assertEquals(3605261L, fc.getOffset().longValue());
 
         f = fc.get(FieldType.NG_BEFORE);
         assertEquals(1024L * 128278, ((Long)f.getValue()).longValue());
         f = fc.get(FieldType.NG_AFTER);
+        //noinspection PointlessArithmeticExpression
         assertEquals(1024L * 0, ((Long)f.getValue()).longValue());
         f = fc.get(FieldType.NG_CAPACITY);
         assertEquals(1024L * 1856576, ((Long)f.getValue()).longValue());
@@ -153,7 +162,7 @@ public class CompleteEventSampleTest extends Assert
         nc = (NewGenerationCollection)events.get(4);
 
         assertEquals(205L, nc.getDuration());
-        assertEquals(4631564L, nc.getOffset());
+        assertEquals(4631564L, nc.getOffset().longValue());
 
         f = nc.get(FieldType.NG_BEFORE);
         assertEquals(1024L * 1438615, ((Long)f.getValue()).longValue());
@@ -172,11 +181,12 @@ public class CompleteEventSampleTest extends Assert
         fc = (FullCollection)events.get(5);
 
         assertEquals(2560L, fc.getDuration());
-        assertEquals(4631769L, fc.getOffset());
+        assertEquals(4631769L, fc.getOffset().longValue());
 
         f = fc.get(FieldType.NG_BEFORE);
         assertEquals(1024L * 292432, ((Long)f.getValue()).longValue());
         f = fc.get(FieldType.NG_AFTER);
+        //noinspection PointlessArithmeticExpression
         assertEquals(1024L * 0, ((Long)f.getValue()).longValue());
         f = fc.get(FieldType.NG_CAPACITY);
         assertEquals(1024L * 1688448, ((Long)f.getValue()).longValue());
@@ -204,7 +214,7 @@ public class CompleteEventSampleTest extends Assert
         nc = (NewGenerationCollection)events.get(6);
 
         assertEquals(62L, nc.getDuration());
-        assertEquals(203963710L, nc.getOffset());
+        assertEquals(203963710L, nc.getOffset().longValue());
 
         f = nc.get(FieldType.NG_BEFORE);
         assertEquals(1024L * 868933, ((Long)f.getValue()).longValue());
@@ -223,11 +233,12 @@ public class CompleteEventSampleTest extends Assert
         fc = (FullCollection)events.get(7);
 
         assertEquals(2839L, fc.getDuration());
-        assertEquals(203963772L, fc.getOffset());
+        assertEquals(203963772L, fc.getOffset().longValue());
 
         f = fc.get(FieldType.NG_BEFORE);
         assertEquals(1024L * 362313, ((Long)f.getValue()).longValue());
         f = fc.get(FieldType.NG_AFTER);
+        //noinspection PointlessArithmeticExpression
         assertEquals(1024L * 0, ((Long)f.getValue()).longValue());
         f = fc.get(FieldType.NG_CAPACITY);
         assertEquals(1024L * 1398144, ((Long)f.getValue()).longValue());
@@ -253,8 +264,8 @@ public class CompleteEventSampleTest extends Assert
         Shutdown se = (Shutdown)events.get(8);
 
         assertEquals(0L, se.getDuration());
-        assertEquals(203963772L, se.getOffset());
-        assertEquals(203963772L, se.getTime());
+        assertNull(se.getOffset());
+        assertNull(se.getTime());
 
         log.debug(".");
     }

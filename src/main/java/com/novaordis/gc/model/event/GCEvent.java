@@ -12,7 +12,11 @@ import com.novaordis.gc.parser.GCEventParser;
  */
 public interface GCEvent
 {
-    long getTime();
+    /**
+     * @return the event timestamp in milliseconds. There are events (such as Shutdown) for which there is no timestamp
+     *         so it may return null.
+     */
+    Long getTime();
 
     /**
      * In milliseconds.
@@ -20,9 +24,10 @@ public interface GCEvent
     long getDuration();
 
     /**
-     * Offset to time origin (in milliseconds). Appears as "3229.871:" in logs.
+     * @return the offset to time origin (in milliseconds). Appears as "3229.871:" in logs. There are events for which
+     *         the offset is not specified, so the method may return null.
      */
-    long getOffset();
+    Long getOffset();
 
     CollectionType getCollectionType();
 

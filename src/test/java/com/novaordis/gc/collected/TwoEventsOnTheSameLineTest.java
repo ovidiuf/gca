@@ -56,7 +56,7 @@ public class TwoEventsOnTheSameLineTest extends Assert
 
         NewGenerationCollection e = (NewGenerationCollection)events.get(0);
 
-        assertEquals(27036837L, e.getOffset());
+        assertEquals(27036837L, e.getOffset().longValue());
 
         Field f = e.get(FieldType.NOTES);
         assertEquals("promotion failed", f.getValue());
@@ -97,7 +97,7 @@ public class TwoEventsOnTheSameLineTest extends Assert
 
         NewGenerationCollection e = (NewGenerationCollection)events.get(0);
 
-        assertEquals(53254235L, e.getOffset());
+        assertEquals(53254235L, e.getOffset().longValue());
         Field f = e.get(FieldType.NOTES);
         assertNotNull(f);
         assertEquals("promotion failed", f.getValue());

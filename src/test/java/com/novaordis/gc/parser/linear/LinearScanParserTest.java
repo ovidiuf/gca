@@ -62,7 +62,7 @@ public class LinearScanParserTest extends Assert
         assertEquals(3, events.size());
 
         NewGenerationCollection ngc = (NewGenerationCollection)events.get(0);
-        assertEquals(5751, ngc.getTime());
+        assertEquals(5751, ngc.getTime().longValue());
         assertEquals(52, ngc.getDuration());
 
         assertEquals(660640L * 1024, ngc.get(FieldType.NG_BEFORE).getValue());
@@ -70,7 +70,7 @@ public class LinearScanParserTest extends Assert
         assertEquals(1835008L * 1024, ngc.get(FieldType.NG_CAPACITY).getValue());
 
         FullCollection fc = (FullCollection)events.get(1);
-        assertEquals(5803, fc.getTime());
+        assertEquals(5803, fc.getTime().longValue());
         assertEquals(264, fc.getDuration());
 
         assertEquals(0L, fc.get(FieldType.OG_BEFORE).getValue());
@@ -78,7 +78,7 @@ public class LinearScanParserTest extends Assert
         assertEquals(4194304L * 1024, fc.get(FieldType.OG_CAPACITY).getValue());
 
         NewGenerationCollection ngc2 = (NewGenerationCollection)events.get(2);
-        assertEquals(14989, ngc2.getTime());
+        assertEquals(14989, ngc2.getTime().longValue());
         assertEquals(170, ngc2.getDuration());
 
         assertEquals(1572864L * 1024, ngc2.get(FieldType.NG_BEFORE).getValue());
@@ -110,7 +110,7 @@ public class LinearScanParserTest extends Assert
 
         NewGenerationCollection ngc = (NewGenerationCollection)events.get(0);
 
-        assertEquals(1381433648387L, ngc.getTime());
+        assertEquals(1381433648387L, ngc.getTime().longValue());
         assertEquals(174, ngc.getDuration());
 
         assertEquals(628032L * 1024, ngc.get(FieldType.NG_BEFORE).getValue());
@@ -123,7 +123,7 @@ public class LinearScanParserTest extends Assert
 
         FullCollection fc = (FullCollection)events.get(1);
 
-        assertEquals(1381433652370L, fc.getTime());
+        assertEquals(1381433652370L, fc.getTime().longValue());
         assertEquals(2362, fc.getDuration());
 
         assertEquals(468402L * 1024, fc.get(FieldType.OG_BEFORE).getValue());
@@ -132,7 +132,7 @@ public class LinearScanParserTest extends Assert
 
         NewGenerationCollection ngc2 = (NewGenerationCollection)events.get(2);
 
-        assertEquals(1381433666055L, ngc2.getTime());
+        assertEquals(1381433666055L, ngc2.getTime().longValue());
         assertEquals(213, ngc2.getDuration());
 
         assertEquals(628352L * 1024, ngc2.get(FieldType.NG_BEFORE).getValue());

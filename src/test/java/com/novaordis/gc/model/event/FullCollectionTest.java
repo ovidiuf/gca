@@ -37,8 +37,8 @@ public class FullCollectionTest extends GCEventTest
 
         FullCollection e = new FullCollection(ts, 1L, ng, og, pg, heap, true);
 
-        assertEquals(1000L, e.getTime());
-        assertEquals(1000L, e.getOffset());
+        assertEquals(1000L, e.getTime().longValue());
+        assertEquals(1000L, e.getOffset().longValue());
         assertEquals(1L, e.getDuration());
 
         assertEquals(2048L, e.get(FieldType.NG_BEFORE).getValue());

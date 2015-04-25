@@ -44,8 +44,6 @@ public class ShutdownParserTest extends Assert
     @Test
     public void testNormalBehavior() throws Exception
     {
-        Timestamp previousEventTimestamp = new Timestamp("1.001", 1L, null, false);
-
         String[] lines = new String[]
                 {
                         "Heap",
@@ -61,12 +59,12 @@ public class ShutdownParserTest extends Assert
 
         ShutdownParser p = new ShutdownParser();
 
-        Shutdown se = (Shutdown)p.parse(previousEventTimestamp, lines[0], 7L, null, null);
+        Shutdown se = (Shutdown)p.parse(null, lines[0], 7L, null, null);
 
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
-        assertEquals(1001L, se.getOffset());
-        assertEquals(1002L, se.getTime());
+        assertNull(se.getOffset());
+        assertNull(se.getTime());
         assertEquals(0L, se.getDuration());
         assertEquals(0, se.getLines().size());
 
@@ -76,8 +74,8 @@ public class ShutdownParserTest extends Assert
         assertEquals(se, gce);
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
-        assertEquals(1001L, se.getOffset());
-        assertEquals(1002L, se.getTime());
+        assertNull(se.getOffset());
+        assertNull(se.getTime());
         assertEquals(0L, se.getDuration());
         assertEquals(1, se.getLines().size());
 
@@ -85,8 +83,8 @@ public class ShutdownParserTest extends Assert
         assertEquals(se, gce);
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
-        assertEquals(1001L, se.getOffset());
-        assertEquals(1002L, se.getTime());
+        assertNull(se.getOffset());
+        assertNull(se.getTime());
         assertEquals(0L, se.getDuration());
         assertEquals(2, se.getLines().size());
 
@@ -94,8 +92,8 @@ public class ShutdownParserTest extends Assert
         assertEquals(se, gce);
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
-        assertEquals(1001L, se.getOffset());
-        assertEquals(1002L, se.getTime());
+        assertNull(se.getOffset());
+        assertNull(se.getTime());
         assertEquals(0L, se.getDuration());
         assertEquals(3, se.getLines().size());
 
@@ -103,8 +101,8 @@ public class ShutdownParserTest extends Assert
         assertEquals(se, gce);
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
-        assertEquals(1001L, se.getOffset());
-        assertEquals(1002L, se.getTime());
+        assertNull(se.getOffset());
+        assertNull(se.getTime());
         assertEquals(0L, se.getDuration());
         assertEquals(4, se.getLines().size());
 
@@ -112,8 +110,8 @@ public class ShutdownParserTest extends Assert
         assertEquals(se, gce);
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
-        assertEquals(1001L, se.getOffset());
-        assertEquals(1002L, se.getTime());
+        assertNull(se.getOffset());
+        assertNull(se.getTime());
         assertEquals(0L, se.getDuration());
         assertEquals(5, se.getLines().size());
 
@@ -121,8 +119,8 @@ public class ShutdownParserTest extends Assert
         assertEquals(se, gce);
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
-        assertEquals(1001L, se.getOffset());
-        assertEquals(1002L, se.getTime());
+        assertNull(se.getOffset());
+        assertNull(se.getTime());
         assertEquals(0L, se.getDuration());
         assertEquals(6, se.getLines().size());
 
@@ -130,8 +128,8 @@ public class ShutdownParserTest extends Assert
         assertEquals(se, gce);
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
-        assertEquals(1001L, se.getOffset());
-        assertEquals(1002L, se.getTime());
+        assertNull(se.getOffset());
+        assertNull(se.getTime());
         assertEquals(0L, se.getDuration());
         assertEquals(7, se.getLines().size());
 
@@ -139,8 +137,8 @@ public class ShutdownParserTest extends Assert
 
         assertEquals(se, gce);
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
-        assertEquals(1001L, se.getOffset());
-        assertEquals(1002L, se.getTime());
+        assertNull(se.getOffset());
+        assertNull(se.getTime());
         assertEquals(0L, se.getDuration());
         assertEquals(8, se.getLines().size());
 
@@ -153,8 +151,6 @@ public class ShutdownParserTest extends Assert
     @Test
     public void testWrongEventType() throws Exception
     {
-        Timestamp previousEventTimestamp = new Timestamp("1.001", 1L, null, false);
-
         String[] lines = new String[]
                 {
                         "Heap",
@@ -170,17 +166,19 @@ public class ShutdownParserTest extends Assert
 
         ShutdownParser p = new ShutdownParser();
 
-        Shutdown se = (Shutdown)p.parse(previousEventTimestamp, lines[0], 7L, null, null);
+        Shutdown se = (Shutdown)p.parse(null, lines[0], 7L, null, null);
 
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
-        assertEquals(1001L, se.getOffset());
-        assertEquals(1002L, se.getTime());
+        assertNull(se.getOffset());
+        assertNull(se.getTime());
         assertEquals(0L, se.getDuration());
+
+        Timestamp ts = new Timestamp("1.001", 1L, null, false);
 
         try
         {
-            p.parse(null, lines[1], 11L, new FullCollection(previousEventTimestamp, 1L, null, null, null, null, false), null);
+            p.parse(null, lines[1], 11L, new FullCollection(ts, 1L, null, null, null, null, false), null);
             fail("should fail with IllegalArgumentException, can't accept a non-Shutdown event in continuation");
         }
         catch(IllegalArgumentException e)
@@ -227,8 +225,8 @@ public class ShutdownParserTest extends Assert
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
 
         assertEquals(0L, se.getDuration());
-        assertEquals(5585L, se.getOffset());
-        assertEquals(5586L, se.getTime());
+        assertNull(se.getOffset());
+        assertNull(se.getTime());
 
         ShutdownParser parser = (ShutdownParser)se.getActiveParser();
         // we test for non-null because we want to know the state we end up with - normally we should clean up the associated parser, as

@@ -59,8 +59,8 @@ public class FullCollectionParserTest extends Assert
 
         assertNotNull(e);
 
-        assertEquals(1000L, e.getTime());
-        assertEquals(1000L, e.getOffset());
+        assertEquals(1000L, e.getTime().longValue());
+        assertEquals(1000L, e.getOffset().longValue());
 
         assertEquals(32861L * 1024, e.get(FieldType.NG_BEFORE).getValue());
         assertEquals(0L, e.get(FieldType.NG_AFTER).getValue());
@@ -96,8 +96,8 @@ public class FullCollectionParserTest extends Assert
 
         assertNotNull(e);
 
-        assertEquals(1000L, e.getTime());
-        assertEquals(1000L, e.getOffset());
+        assertEquals(1000L, e.getTime().longValue());
+        assertEquals(1000L, e.getOffset().longValue());
 
         assertEquals(1080L * 1024, e.get(FieldType.NG_BEFORE).getValue());
         //noinspection PointlessArithmeticExpression
@@ -135,8 +135,8 @@ public class FullCollectionParserTest extends Assert
 
         assertNotNull(e);
 
-        assertEquals(1000L, e.getTime());
-        assertEquals(1000L, e.getOffset());
+        assertEquals(1000L, e.getTime().longValue());
+        assertEquals(1000L, e.getOffset().longValue());
 
         assertNull(e.get(FieldType.NG_BEFORE));
         assertNull(e.get(FieldType.NG_AFTER));
@@ -173,8 +173,8 @@ public class FullCollectionParserTest extends Assert
 
         assertNotNull(e);
 
-        assertEquals(1000L, e.getTime());
-        assertEquals(1000L, e.getOffset());
+        assertEquals(1000L, e.getTime().longValue());
+        assertEquals(1000L, e.getOffset().longValue());
 
         assertEquals(25762L * 1024, e.get(FieldType.NG_BEFORE).getValue());
         //noinspection PointlessArithmeticExpression
@@ -219,8 +219,8 @@ public class FullCollectionParserTest extends Assert
 
         assertNotNull(e);
 
-        assertEquals(1000L, e.getTime());
-        assertEquals(1000L, e.getOffset());
+        assertEquals(1000L, e.getTime().longValue());
+        assertEquals(1000L, e.getOffset().longValue());
 
         assertNull(e.get(FieldType.NG_BEFORE));
         assertNull(e.get(FieldType.NG_AFTER));

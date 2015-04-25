@@ -47,8 +47,8 @@ public class CMSInitialMarkTest extends Assert
 
         CMSInitialMark e = (CMSInitialMark)events.get(0);
 
-        assertEquals(1118543850L, e.getTime());
-        assertEquals(1118543850L, e.getOffset());
+        assertEquals(1118543850L, e.getTime().longValue());
+        assertEquals(1118543850L, e.getOffset().longValue());
 
         Field og = e.get(FieldType.OG);
         assertEquals(3988076L * 1024, og.getValue());
@@ -62,6 +62,8 @@ public class CMSInitialMarkTest extends Assert
         Field heapc = e.get(FieldType.HEAP_CAPACITY);
         assertNotNull(heapc);
         assertEquals(7610880L * 1024, heapc.getValue());
+
+        log.debug(".");
     }
 
     @Test
@@ -74,7 +76,7 @@ public class CMSInitialMarkTest extends Assert
         CMSInitialMark e = CMSParser.parseCMSInitialMark(ts, line, -1L, null);
 
         assertNotNull(e);
-        assertEquals(1L, e.getOffset());
+        assertEquals(1L, e.getOffset().longValue());
         assertEquals(101L, e.getDuration());
 
         Field og = e.get(FieldType.OG);
@@ -100,7 +102,7 @@ public class CMSInitialMarkTest extends Assert
         CMSInitialMark e = CMSParser.parseCMSInitialMark(ts, line, -1L, null);
 
         assertNotNull(e);
-        assertEquals(1L, e.getOffset());
+        assertEquals(1L, e.getOffset().longValue());
         assertEquals(2L, e.getDuration());
 
         Field og = e.get(FieldType.OG);

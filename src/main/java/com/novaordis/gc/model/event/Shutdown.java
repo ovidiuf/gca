@@ -27,27 +27,23 @@ public class Shutdown implements GCEvent
     // Attributes ------------------------------------------------------------------------------------------------------
 
     private ShutdownParser activeParser;
-    private long offset;
-    private long time;
 
     private List<String> lines;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
-    public Shutdown(Timestamp ts, ShutdownParser parser)
+    public Shutdown(ShutdownParser parser)
     {
         this.activeParser = parser;
-        this.time = ts.getTime();
-        this.offset = ts.getOffset();
         this.lines = new ArrayList<String>();
     }
 
     // GCEvent overrides -----------------------------------------------------------------------------------------------
 
     @Override
-    public long getTime()
+    public Long getTime()
     {
-        return time;
+        return null;
     }
 
     /**
@@ -60,9 +56,9 @@ public class Shutdown implements GCEvent
     }
 
     @Override
-    public long getOffset()
+    public Long getOffset()
     {
-        return offset;
+        return null;
     }
 
     @Override

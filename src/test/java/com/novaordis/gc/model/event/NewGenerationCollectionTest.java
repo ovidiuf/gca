@@ -36,8 +36,8 @@ public class NewGenerationCollectionTest extends GCEventTest
 
         NewGenerationCollection e = new NewGenerationCollection(ts, 1L, ng, heap);
 
-        assertEquals(1408003948621L, e.getTime());
-        assertEquals(27036837L, e.getOffset());
+        assertEquals(1408003948621L, e.getTime().longValue());
+        assertEquals(27036837L, e.getOffset().longValue());
         assertEquals(1L, e.getDuration());
 
         assertEquals(2048L, e.get(FieldType.NG_BEFORE).getValue());

@@ -55,8 +55,14 @@ public class ShutdownParser extends GCEventParserBase
                 return null;
             }
 
-            // it's a shutdown event
-            return new Shutdown(ts, this);
+            // it's a shutdown event, we expect a null timestamp
+            if (ts != null)
+            {
+                throw new ParserException(
+                    "we identified a Shutdown event on line " + lineNumber + ", but the timestamp is not null: " + ts, lineNumber);
+            }
+
+            return new Shutdown(this);
         }
         else
         {

@@ -6,13 +6,6 @@ import com.novaordis.gc.model.Timestamp;
 import com.novaordis.gc.model.Value;
 import com.novaordis.gc.model.event.GCEvent;
 import com.novaordis.gc.parser.GCEventParser;
-import org.apache.log4j.Logger;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.sql.Time;
 
 /**
  * @author <a href="mailto:ovidiu@novaordis.com">Ovidiu Feodorov</a>
@@ -22,8 +15,6 @@ import java.sql.Time;
 public class MockGCEvent implements GCEvent
 {
     // Constants -------------------------------------------------------------------------------------------------------
-
-    private static final Logger log = Logger.getLogger(MockGCEvent.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -45,9 +36,9 @@ public class MockGCEvent implements GCEvent
     // GCEvent implementation ------------------------------------------------------------------------------------------
 
     @Override
-    public long getTime()
+    public Long getTime()
     {
-        return timestamp == null ? -1L : timestamp.getTime();
+        return timestamp == null ? null : timestamp.getTime();
     }
 
     @Override
@@ -57,9 +48,9 @@ public class MockGCEvent implements GCEvent
     }
 
     @Override
-    public long getOffset()
+    public Long getOffset()
     {
-        return -1L;
+        return null;
     }
 
     @Override

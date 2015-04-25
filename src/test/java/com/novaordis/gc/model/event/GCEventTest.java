@@ -33,11 +33,11 @@ public abstract class GCEventTest extends Assert
         GCEvent e = getGCEventToTest(ts, 7L);
 
         // time (dedicated accessor and generic field)
-        assertEquals(100110L, e.getTime());
+        assertEquals(100110L, e.getTime().longValue());
         assertEquals(100110L, ((Long)e.get(FieldType.TIME).getValue()).longValue());
 
         // offset (dedicated accessor and generic field)
-        assertEquals(100100L, e.getOffset());
+        assertEquals(100100L, e.getOffset().longValue());
         assertEquals("100.100", e.get(FieldType.OFFSET).getValue());
 
         // duration (dedicated accessor and generic field)

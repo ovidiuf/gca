@@ -60,8 +60,8 @@ public class NewGenerationCollectionParserTest extends Assert
 
         assertNotNull(e);
 
-        assertEquals(1000L, e.getTime());
-        assertEquals(1000L, e.getOffset());
+        assertEquals(1000L, e.getTime().longValue());
+        assertEquals(1000L, e.getOffset().longValue());
 
         assertEquals(1890405L * 1024, e.get(FieldType.NG_BEFORE).getValue());
         assertEquals(109278L * 1024, e.get(FieldType.NG_AFTER).getValue());
@@ -87,8 +87,8 @@ public class NewGenerationCollectionParserTest extends Assert
 
         assertNotNull(e);
 
-        assertEquals(1000L, e.getTime());
-        assertEquals(1000L, e.getOffset());
+        assertEquals(1000L, e.getTime().longValue());
+        assertEquals(1000L, e.getOffset().longValue());
 
         assertEquals(1139286L * 1024, e.get(FieldType.NG_BEFORE).getValue());
         assertEquals(1139286L * 1024, e.get(FieldType.NG_AFTER).getValue());
@@ -141,8 +141,8 @@ public class NewGenerationCollectionParserTest extends Assert
 
         assertNotNull(e);
 
-        assertEquals(1985L, e.getTime());
-        assertEquals(1985L, e.getOffset());
+        assertEquals(1985L, e.getTime().longValue());
+        assertEquals(1985L, e.getOffset().longValue());
 
         assertEquals(136320L * 1024, e.get(FieldType.NG_BEFORE).getValue());
         assertEquals(6357L * 1024, e.get(FieldType.NG_AFTER).getValue());
@@ -168,8 +168,8 @@ public class NewGenerationCollectionParserTest extends Assert
 
         assertNotNull(e);
 
-        assertEquals(1985L, e.getTime());
-        assertEquals(1985L, e.getOffset());
+        assertEquals(1985L, e.getTime().longValue());
+        assertEquals(1985L, e.getOffset().longValue());
 
         assertEquals(136320L * 1024, e.get(FieldType.NG_BEFORE).getValue());
         assertEquals(6357L * 1024, e.get(FieldType.NG_AFTER).getValue());
@@ -195,8 +195,8 @@ public class NewGenerationCollectionParserTest extends Assert
 
         assertNotNull(e);
 
-        assertEquals(53795248L, e.getTime());
-        assertEquals(53795248L, e.getOffset());
+        assertEquals(53795248L, e.getTime().longValue());
+        assertEquals(53795248L, e.getOffset().longValue());
 
         assertEquals(451130L * 1024, e.get(FieldType.NG_BEFORE).getValue());
         assertEquals(52416L * 1024, e.get(FieldType.NG_AFTER).getValue());
@@ -209,63 +209,52 @@ public class NewGenerationCollectionParserTest extends Assert
         assertEquals(29, e.getDuration(), 0.0001);
     }
 
-    //
-    // new generation collection that shows "promotion failed"
-    //
     @Test
-    public void testCMS_PromotionFailed() throws Exception
+    public void testCMS_PromotionFailed_degenerateCase() throws Exception
     {
+        // we should never get in this situation, this is a remnant test from before splitting the
+        // line by the timestamps
+
         String line = "[GC2014-08-14T01:12:28.622-0700: 27036.837: [ParNew (promotion failed): 471872K->471872K(471872K), 0.3931530 secs]2014-08-14T01:12:29.015-0700: 27037.231: [CMS2014-08-14T01:12:29.867-0700: 27038.083: [CMS-concurrent-preclean: 4.167/17.484 secs] [Times: user=21.55 sys=2.82, real=17.48 secs]";
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
         Timestamp ts = new Timestamp("27036.837", 0L, null, false);
 
-        NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null, null);
-
-        assertNotNull(e);
-
-        assertEquals(27036837L, e.getTime());
-        assertEquals(27036837L, e.getOffset());
-
-        assertEquals(471872L * 1024, e.get(FieldType.NG_BEFORE).getValue());
-        assertEquals(471872L * 1024, e.get(FieldType.NG_AFTER).getValue());
-        assertEquals(471872L * 1024, e.get(FieldType.NG_CAPACITY).getValue());
-
-        assertNull(e.get(FieldType.HEAP_BEFORE));
-        assertNull(e.get(FieldType.HEAP_AFTER));
-        assertNull(e.get(FieldType.HEAP_CAPACITY));
-
-        assertEquals(0L, e.getDuration(), 0.0001);
-
-        assertEquals("promotion failed", e.get(FieldType.NOTES).getValue());
+        try
+        {
+            NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, 77L, null, null);
+            fail("should fail with ParserException as we're trying to parse a timestamp as heap info");
+        }
+        catch(ParserException e)
+        {
+            log.info(e.getMessage());
+            assertEquals(77L, e.getLineNumber());
+        }
     }
 
     @Test
-    public void testCMS_GCAndCMSEventsOnTheSameLine() throws Exception
+    public void testCMS_GCAndCMSEventsOnTheSameLine_degenerateCase() throws Exception
     {
+        // we should never get in this situation, this is a remnant test from before splitting the
+        // line by the timestamps
+
         String line = "[GC2014-08-14T01:53:16.892-0700: 29485.108: [ParNew: 471872K->471872K(471872K), 0.0000420 secs]2014-08-14T01:53:16.892-0700: 29485.108: [CMS2014-08-14T01:53:17.076-0700: 29485.292: [CMS-concurrent-mark: 4.337/12.788 secs] [Times: user=19.68 sys=0.31, real=12.79 secs]";
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
         Timestamp ts = new Timestamp("29485.108", 0L, null, false);
 
-        NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null, null);
-
-        assertNotNull(e);
-
-        assertEquals(29485108L, e.getTime());
-        assertEquals(29485108L, e.getOffset());
-
-        assertEquals(471872L * 1024, e.get(FieldType.NG_BEFORE).getValue());
-        assertEquals(471872L * 1024, e.get(FieldType.NG_AFTER).getValue());
-        assertEquals(471872L * 1024, e.get(FieldType.NG_CAPACITY).getValue());
-
-        assertNull(e.get(FieldType.HEAP_BEFORE));
-        assertNull(e.get(FieldType.HEAP_AFTER));
-        assertNull(e.get(FieldType.HEAP_CAPACITY));
-
-        assertEquals(0L, e.getDuration(), 0.0001);
+        try
+        {
+            NewGenerationCollection e = (NewGenerationCollection) p.parse(ts, line, 77L, null, null);
+            fail("should fail with ParserException as we're trying to parse a timestamp as heap info");
+        }
+        catch(ParserException e)
+        {
+            log.info(e.getMessage());
+            assertEquals(77L, e.getLineNumber());
+        }
     }
 
     //
@@ -285,8 +274,8 @@ public class NewGenerationCollectionParserTest extends Assert
 
         assertNotNull(e);
 
-        assertEquals(53233950L, e.getTime());
-        assertEquals(53233950L, e.getOffset());
+        assertEquals(53233950L, e.getTime().longValue());
+        assertEquals(53233950L, e.getOffset().longValue());
 
         assertEquals(4070928L * 1024, e.get(FieldType.NG_BEFORE).getValue());
         assertEquals(986133L * 1024, e.get(FieldType.NG_AFTER).getValue());

@@ -60,7 +60,7 @@ public abstract class GCEventBase implements GCEvent
     // GCEvent overrides -----------------------------------------------------------------------------------------------
 
     @Override
-    public long getTime()
+    public Long getTime()
     {
         return (Long)time.getValue();
     }
@@ -75,7 +75,7 @@ public abstract class GCEventBase implements GCEvent
     }
 
     @Override
-    public long getOffset()
+    public Long getOffset()
     {
         // the offset is maintained as the original String, as we mostly need it for String searches; so every time we need it as a
         // long (milliseconds), we convert it - it should not be very often.
