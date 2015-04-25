@@ -59,7 +59,7 @@ public class ShutdownParserTest extends Assert
 
         ShutdownParser p = new ShutdownParser();
 
-        Shutdown se = (Shutdown)p.parse(null, lines[0], 7L, null, null);
+        Shutdown se = (Shutdown)p.parse(null, lines[0], 7L, null);
 
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
@@ -70,7 +70,7 @@ public class ShutdownParserTest extends Assert
 
         GCEvent gce;
 
-        gce = p.parse(null, lines[1], 11L, se, null);
+        gce = p.parse(null, lines[1], 11L, se);
         assertEquals(se, gce);
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
@@ -79,7 +79,7 @@ public class ShutdownParserTest extends Assert
         assertEquals(0L, se.getDuration());
         assertEquals(1, se.getLines().size());
 
-        gce = p.parse(null, lines[2], 21L, se, null);
+        gce = p.parse(null, lines[2], 21L, se);
         assertEquals(se, gce);
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
@@ -88,7 +88,7 @@ public class ShutdownParserTest extends Assert
         assertEquals(0L, se.getDuration());
         assertEquals(2, se.getLines().size());
 
-        gce = p.parse(null, lines[3], 31L, se, null);
+        gce = p.parse(null, lines[3], 31L, se);
         assertEquals(se, gce);
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
@@ -97,7 +97,7 @@ public class ShutdownParserTest extends Assert
         assertEquals(0L, se.getDuration());
         assertEquals(3, se.getLines().size());
 
-        gce = p.parse(null, lines[4], 41L, se, null);
+        gce = p.parse(null, lines[4], 41L, se);
         assertEquals(se, gce);
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
@@ -106,7 +106,7 @@ public class ShutdownParserTest extends Assert
         assertEquals(0L, se.getDuration());
         assertEquals(4, se.getLines().size());
 
-        gce = p.parse(null, lines[5], 51L, se, null);
+        gce = p.parse(null, lines[5], 51L, se);
         assertEquals(se, gce);
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
@@ -115,7 +115,7 @@ public class ShutdownParserTest extends Assert
         assertEquals(0L, se.getDuration());
         assertEquals(5, se.getLines().size());
 
-        gce = p.parse(null, lines[6], 61L, se, null);
+        gce = p.parse(null, lines[6], 61L, se);
         assertEquals(se, gce);
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
@@ -124,7 +124,7 @@ public class ShutdownParserTest extends Assert
         assertEquals(0L, se.getDuration());
         assertEquals(6, se.getLines().size());
 
-        gce = p.parse(null, lines[7], 71L, se, null);
+        gce = p.parse(null, lines[7], 71L, se);
         assertEquals(se, gce);
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
@@ -133,7 +133,7 @@ public class ShutdownParserTest extends Assert
         assertEquals(0L, se.getDuration());
         assertEquals(7, se.getLines().size());
 
-        gce = p.parse(null, lines[8], 81L, se, null);
+        gce = p.parse(null, lines[8], 81L, se);
 
         assertEquals(se, gce);
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
@@ -166,7 +166,7 @@ public class ShutdownParserTest extends Assert
 
         ShutdownParser p = new ShutdownParser();
 
-        Shutdown se = (Shutdown)p.parse(null, lines[0], 7L, null, null);
+        Shutdown se = (Shutdown)p.parse(null, lines[0], 7L, null);
 
         assertEquals(p, se.getActiveParser());
         assertEquals(CollectionType.SHUTDOWN, se.getCollectionType());
@@ -174,11 +174,11 @@ public class ShutdownParserTest extends Assert
         assertNull(se.getTime());
         assertEquals(0L, se.getDuration());
 
-        Timestamp ts = new Timestamp("1.001", 1L, null, false);
+        Timestamp ts = new Timestamp(1001L);
 
         try
         {
-            p.parse(null, lines[1], 11L, new FullCollection(ts, 1L, null, null, null, null, false), null);
+            p.parse(null, lines[1], 11L, new FullCollection(ts, 1L, null, null, null, null, false));
             fail("should fail with IllegalArgumentException, can't accept a non-Shutdown event in continuation");
         }
         catch(IllegalArgumentException e)
@@ -207,7 +207,7 @@ public class ShutdownParserTest extends Assert
         InputStream fis = new FileInputStream(f);
         InputStreamReader isr = new InputStreamReader(fis);
 
-        LinearScanParser p = new LinearScanParser(isr, null, false);
+        LinearScanParser p = new LinearScanParser(isr);
         p.installDefaultPipeline();
 
         List<GCEvent> events = p.parse(1L);

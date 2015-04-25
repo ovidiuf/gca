@@ -55,7 +55,7 @@ public class Main
                 File gcLogFile = c.getGCLogFile();
                 Long timeOrigin = c.getTimeOrigin();
 
-                GCLogParser gcParser = GCLogParserFactory.getParser(gcLogFile, c.isSuppressTimestampWarning());
+                GCLogParser gcParser = GCLogParserFactory.getParser(gcLogFile);
 
                 events = gcParser.parse(timeOrigin);
             }

@@ -2,17 +2,23 @@ package com.novaordis.gc.model;
 
 import com.novaordis.gc.parser.ParserException;
 import org.apache.log4j.Logger;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.text.SimpleDateFormat;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author <a href="mailto:ovidiu@novaordis.com">Ovidiu Feodorov</a>
  *
  * Copyright 2013 Nova Ordis LLC
  */
-public class TimestampTest extends Assert
+public class TimestampTest
 {
     // Constants -------------------------------------------------------------------------------------------------------
 
@@ -22,7 +28,6 @@ public class TimestampTest extends Assert
 
     public static final SimpleDateFormat TEST_DATE_FORMAT = new SimpleDateFormat("yy/MM/dd HH:mm:ss,SSS Z");
 
-
     // Static ----------------------------------------------------------------------------------------------------------
 
     // Attributes ------------------------------------------------------------------------------------------------------
@@ -30,6 +35,197 @@ public class TimestampTest extends Assert
     // Constructors ----------------------------------------------------------------------------------------------------
 
     // Public ----------------------------------------------------------------------------------------------------------
+
+    // constructor -----------------------------------------------------------------------------------------------------
+
+    @Test
+    public void constructor_offset() throws Exception
+    {
+        Timestamp ts = new Timestamp("1.001", null, 1001L, 5, 12);
+
+        assertNull(ts.getTime());
+        assertEquals(1001L, ts.getOffset().longValue());
+        assertEquals("1.001", ts.getLiteral());
+        assertEquals("1.001", ts.getOffsetLiteral());
+        assertNull(ts.getDateStampLiteral());
+        assertEquals(5, ts.getStartPosition());
+        assertEquals(12, ts.getEndPosition());
+    }
+
+    @Test
+    public void constructor_offset_mismatch() throws Exception
+    {
+        try
+        {
+            new Timestamp("1.001", null, 1002L, 5, 12);
+            fail("should have failed with IllegalArgumentException, literal/offset mismatch");
+        }
+        catch(IllegalArgumentException e)
+        {
+            log.info(e.getMessage());
+        }
+    }
+
+    @Test
+    public void constructor_offset_invalidPosition() throws Exception
+    {
+        try
+        {
+            new Timestamp("1.001", null, 1001L, -1, 12);
+            fail("should have failed with IllegalArgumentException because the start position is invalid");
+        }
+        catch(IllegalArgumentException e)
+        {
+            log.info(e.getMessage());
+        }
+    }
+
+    @Test
+    public void constructor_offset_invalidStartEndPositionDifference() throws Exception
+    {
+        try
+        {
+            new Timestamp("1.001", null, 1001L, 1, 777);
+            fail("should have failed with IllegalArgumentException because the difference between start position and end position is invalid");
+        }
+        catch(IllegalArgumentException e)
+        {
+            log.info(e.getMessage());
+        }
+    }
+
+    @Test
+    public void constructor_dateStamp() throws Exception
+    {
+        String literal = "2015-01-01T01:01:01.001-0700";
+        long time = Timestamp.DATESTAMP_FORMAT.parse(literal).getTime();
+
+        Timestamp ts = new Timestamp(literal, time, null, 0, 30);
+
+        assertEquals(time, ts.getTime().longValue());
+        assertNull(ts.getOffset());
+        assertEquals(literal, ts.getLiteral());
+        assertNull(ts.getOffsetLiteral());
+        assertEquals(literal, ts.getDateStampLiteral());
+        assertEquals(0, ts.getStartPosition());
+        assertEquals(30, ts.getEndPosition());
+    }
+
+    @Test
+    public void constructor_dateStamp_mismatch() throws Exception
+    {
+        String literal = "2015-01-01T01:01:01.001-0700";
+        long time = Timestamp.DATESTAMP_FORMAT.parse(literal).getTime();
+
+        try
+        {
+            new Timestamp(literal, time + 1, null, 0, 30);
+            fail("should have failed with IllegalArgumentException, literal/time mismatch");
+        }
+        catch(IllegalArgumentException e)
+        {
+            log.info(e.getMessage());
+        }
+    }
+
+    @Test
+    public void constructor_combined() throws Exception
+    {
+        String literal = "2015-01-01T01:01:01.001-0700 1.001";
+        long time = Timestamp.DATESTAMP_FORMAT.parse(literal.substring(0, literal.indexOf(' '))).getTime();
+        long offset = Timestamp.offsetToLong(literal.substring(literal.indexOf(' ') + 1), null);
+
+        Timestamp ts = new Timestamp(literal, time, offset, 0, 37);
+
+        assertEquals(time, ts.getTime().longValue());
+        assertEquals(offset, ts.getOffset().longValue());
+        assertEquals(literal, ts.getLiteral());
+        assertEquals("1.001", ts.getOffsetLiteral());
+        assertEquals("2015-01-01T01:01:01.001-0700", ts.getDateStampLiteral());
+        assertEquals(0, ts.getStartPosition());
+        assertEquals(37, ts.getEndPosition());
+    }
+
+    @Test
+    public void constructor_combined_mismatch_time() throws Exception
+    {
+        String literal = "2015-01-01T01:01:01.001-0700 1.001";
+        long time = Timestamp.DATESTAMP_FORMAT.parse(literal.substring(0, literal.indexOf(' '))).getTime();
+
+        try
+        {
+            new Timestamp(literal, time + 1, 1001L, 0, 37);
+            fail("should have failed with IllegalArgumentException, literal/time mismatch");
+        }
+        catch(IllegalArgumentException e)
+        {
+            log.info(e.getMessage());
+        }
+    }
+
+    @Test
+    public void constructor_combined_mismatch_offset() throws Exception
+    {
+        String literal = "2015-01-01T01:01:01.001-0700 1.001";
+        long time = Timestamp.DATESTAMP_FORMAT.parse(literal.substring(0, literal.indexOf(' '))).getTime();
+
+        try
+        {
+            new Timestamp(literal, time, 1002L, 0, 37);
+            fail("should have failed with IllegalArgumentException, literal/offset mismatch");
+        }
+        catch(IllegalArgumentException e)
+        {
+            log.info(e.getMessage());
+        }
+    }
+
+    @Test
+    public void syntheticConstructor() throws Exception
+    {
+        Timestamp t = new Timestamp(1L);
+        assertEquals(1L, t.getOffset().longValue());
+        assertNull(t.getTime());
+        assertEquals("0.001", t.getLiteral());
+        assertEquals("0.001", t.getOffsetLiteral());
+        assertNull(t.getDateStampLiteral());
+    }
+
+    // equals() --------------------------------------------------------------------------------------------------------
+
+    @Test
+    public void testEquals_SyntheticConstructor() throws Exception
+    {
+        Timestamp ts = new Timestamp(1001L);
+        ts.applyTimeOrigin(0);
+
+        Timestamp ts2 = new Timestamp(1001L);
+        ts2.applyTimeOrigin(0);
+
+        assertEquals(ts, ts2);
+        assertEquals(ts2, ts);
+    }
+
+    @Test
+    public void testEquals() throws Exception
+    {
+        String literal = "2015-01-01T01:01:01.001-0700 1.111";
+        long time = Timestamp.DATESTAMP_FORMAT.parse(literal.substring(0, literal.indexOf(' '))).getTime();
+        long offset = Timestamp.offsetToLong(literal.substring(literal.indexOf(' ') + 1), null);
+
+        Timestamp ts = new Timestamp(literal, time, offset, 0, 37);
+
+        String literal2 = "2015-01-01T01:01:01.001-0700 2.222";
+        long time2 = Timestamp.DATESTAMP_FORMAT.parse(literal.substring(0, literal.indexOf(' '))).getTime();
+        long offset2 = Timestamp.offsetToLong(literal.substring(literal.indexOf(' ') + 1), null);
+
+        Timestamp ts2 = new Timestamp(literal, time, offset, 0, 37);
+
+        // timestamps are equal if the time is equal - even for different offsets
+
+        assertEquals(ts, ts2);
+        assertEquals(ts2, ts);
+    }
 
     // offsetToLong() --------------------------------------------------------------------------------------------------
 
@@ -64,6 +260,26 @@ public class TimestampTest extends Assert
             log.info(e.getMessage());
             assertEquals(7L, e.getLineNumber());
         }
+    }
+
+    // longToOffsetLiteral() -------------------------------------------------------------------------------------------
+
+    @Test
+    public void longToOffsetLiteral() throws Exception
+    {
+        assertEquals("0.001", Timestamp.longToOffsetLiteral(1L));
+    }
+
+    @Test
+    public void longToOffsetLiteral2() throws Exception
+    {
+        assertEquals("0.010", Timestamp.longToOffsetLiteral(10L));
+    }
+
+    @Test
+    public void longToOffsetLiteral3() throws Exception
+    {
+        assertEquals("123.456", Timestamp.longToOffsetLiteral(123456L));
     }
 
     // dateStampToTime() -----------------------------------------------------------------------------------------------
@@ -403,53 +619,112 @@ public class TimestampTest extends Assert
         assertNull(Timestamp.find(s, t.getEndPosition(), 7L));
     }
 
+    @Test
+    public void find_nothing() throws Exception
+    {
+        String s = "blah";
+        Timestamp r = Timestamp.find(s, 0, 7L);
+        assertNull(r);
+    }
+
+    @Test
+    public void find_PrintGCDateStampsAndOffset_byItself() throws Exception
+    {
+        String s = "2014-08-14T01:53:16.892-0700: ";
+
+        Timestamp r = Timestamp.find(s, 0, 7L);
+        assertNotNull(r);
+
+        assertEquals(0, r.getStartPosition());
+        assertEquals(s.length(), r.getEndPosition());
+        assertEquals(TEST_DATE_FORMAT.parse("14/08/14 01:53:16,892 -0700").getTime(), r.getTime().longValue());
+    }
+
+    @Test
+    public void find_PrintGCDateStampsAndOffset_testTwoOccurrencesOnSameLine() throws Exception
+    {
+        String s = "2014-08-14T01:53:16.892-0700: something blah blah]2014-08-14T01:53:16.893-0700: blah";
+
+        Timestamp r = Timestamp.find(s, 0, 7L);
+        assertNotNull(r);
+
+        assertEquals(0, r.getStartPosition());
+        assertEquals(30, r.getEndPosition());
+        assertNull(r.getOffsetLiteral());
+        assertEquals(TEST_DATE_FORMAT.parse("14/08/14 01:53:16,892 -0700").getTime(), r.getTime().longValue());
+
+        r = Timestamp.find(s, r.getEndPosition(), 7L);
+        assertNotNull(r);
+
+        assertEquals(50, r.getStartPosition());
+        assertEquals(80, r.getEndPosition());
+        assertNull(r.getOffsetLiteral());
+        assertEquals(TEST_DATE_FORMAT.parse("14/08/14 01:53:16,893 -0700").getTime(), r.getTime().longValue());
+    }
+
+    @Test
+    public void find_offset() throws Exception
+    {
+        String s = "[GC 53254.235: [ParNew (promotion failed): 3976407K->4348148K(4373760K), 0.2367350 secs]53254.472: [CMS53258.238: [CMS-concurrent-mark: ...";
+
+        Timestamp r = Timestamp.find(s, 0, 7L);
+        assertNotNull(r);
+
+        assertEquals(53254472L, r.getOffset().longValue());
+        assertEquals(88, r.getStartPosition());
+        assertEquals(99, r.getEndPosition());
+        assertEquals("53254.472", r.getLiteral());
+        assertEquals("53254.472", r.getOffsetLiteral());
+    }
+
+    @Test
+    public void find_offset_2() throws Exception
+    {
+        String s = "]0.472: ...";
+
+        Timestamp r = Timestamp.find(s, 0, 7L);
+        assertNotNull(r);
+
+        assertEquals(472L, r.getOffset().longValue());
+        assertEquals(1, r.getStartPosition());
+        assertEquals(8, r.getEndPosition());
+        assertEquals("0.472", r.getLiteral());
+        assertEquals("0.472", r.getOffsetLiteral());
+    }
+
     // applyTimeOrigin() -----------------------------------------------------------------------------------------------
 
     @Test
     public void applyTimeOrigin_OnlyOffset() throws Exception
     {
-        Timestamp ts = new Timestamp("1.111", null, 1111L, -1, -1);
+        Timestamp ts = new Timestamp("1.111", null, 1111L, 0, "1.111".length() + 2);
 
         assertNull(ts.getTime());
 
-        ts.applyTimeOrigin(1L);
+        Timestamp ts2 = ts.applyTimeOrigin(1L);
 
         Long time = ts.getTime();
         assertEquals(1112L, time.longValue());
+
+        assertTrue(ts == ts2);
     }
 
     @Test
     public void applyTimeOrigin_TimeAlreadySet() throws Exception
     {
-        Timestamp ts = new Timestamp("this would be a date stamp corresponding to 1001L", 1001L, null, -1, -1);
+        String literal = Timestamp.DATESTAMP_FORMAT.format(1001L);
+        Timestamp ts = new Timestamp(literal, 1001L, null, 0, literal.length() + 2);
 
         assertEquals(1001L, ts.getTime().longValue());
         assertNull(ts.getOffset());
 
         // this is a noop
-        ts.applyTimeOrigin(1L);
+        Timestamp ts2 = ts.applyTimeOrigin(1L);
 
         assertEquals(1001L, ts.getTime().longValue());
         assertNull(ts.getOffset());
-    }
 
-    @Test
-    public void applyTimeOrigin_TimeNotSetButNoOffset() throws Exception
-    {
-        Timestamp ts = new Timestamp("blah", null, null, -1, -1);
-
-        assertNull(ts.getOffset());
-        assertNull(ts.getTime());
-
-        try
-        {
-            ts.applyTimeOrigin(1L);
-            fail("this should fail with IllegalStateException, null offset");
-        }
-        catch(IllegalStateException e)
-        {
-            log.info(e.getMessage());
-        }
+        assertTrue(ts == ts2);
     }
 
     // getOffsetLiteral() ----------------------------------------------------------------------------------------------
@@ -457,7 +732,9 @@ public class TimestampTest extends Assert
     @Test
     public void getOffsetLiteral_NullOffset() throws Exception
     {
-        Timestamp ts = new Timestamp("blah", null, null, -1, -1);
+        String literal = "2014-08-14T01:12:28.621-0700";
+        Timestamp ts = new Timestamp(
+            literal, Timestamp.DATESTAMP_FORMAT.parse(literal).getTime(), null, 0, literal.length() + 2);
 
         assertNull(ts.getOffset());
         assertNull(ts.getOffsetLiteral());
@@ -466,289 +743,37 @@ public class TimestampTest extends Assert
     @Test
     public void getOffsetLiteral() throws Exception
     {
-        Timestamp ts = new Timestamp("1.001", null, 1001L, -1, -1);
+        Timestamp ts = new Timestamp("1.001", null, 1001L, 0, "1.001".length() + 2);
 
         assertEquals(1001L, ts.getOffset().longValue());
         assertEquals("1.001", ts.getOffsetLiteral());
     }
 
-//    @Test
-//    public void find_Datestamp_testNotMatching() throws Exception
-//    {
-//        String s = "blah";
-//
-//        Timestamp r = Timestamp.find(s, 0, 7L);
-//        assertNull(r);
-//    }
-//
-//    @Test
-//    public void find_Datestamp_testByItself() throws Exception
-//    {
-//        String s = "2014-08-14T01:53:16.892-0700";
-//
-//        Timestamp r = Timestamp.find(s, 0, 7L);
-//        assertNotNull(r);
-//
-//        assertEquals(0, r.getStartPosition());
-//        assertEquals(s.length(), r.getEndPosition());
-//        assertEquals(TEST_DATE_FORMAT.parse("14/08/14 01:53:16,892 -0700").getTime(), r.getTime().longValue());
-//    }
-//
-//    @Test
-//    public void find_Datestamp_testTrailingChar() throws Exception
-//    {
-//        String s = "2014-09-14T01:53:16.892-0700:";
-//
-//        Timestamp r = Timestamp.find(s, 0, 7L);
-//        assertNotNull(r);
-//
-//        assertEquals(0, r.getStartPosition());
-//        assertEquals(s.length() - 1, r.getEndPosition());
-//        assertEquals(TEST_DATE_FORMAT.parse("14/09/14 01:53:16,892 -0700").getTime(), r.getTime().longValue());
-//    }
-//
-//    @Test
-//    public void find_Datestamp_testTwoOccurrencesOnSameLine() throws Exception
-//    {
-//        String s = "2014-08-14T01:53:16.892-0700: something blah blah2014-08-14T01:53:16.893-0700";
-//
-//        Timestamp r = Timestamp.find(s, 0, 7L);
-//        assertNotNull(r);
-//
-//        assertEquals(0, r.getStartPosition());
-//        assertEquals(28, r.getEndPosition());
-//        assertEquals(TEST_DATE_FORMAT.parse("14/08/14 01:53:16,892 -0700").getTime(), r.getTime().longValue());
-//
-//        r = Timestamp.find(s, r.getEndPosition(), 7L);
-//        assertNotNull(r);
-//
-//        assertEquals(49, r.getStartPosition());
-//        assertEquals(s.length(), r.getEndPosition());
-//        assertEquals(TEST_DATE_FORMAT.parse("14/08/14 01:53:16,893 -0700").getTime(), r.getTime().longValue());
-//    }
-//
-//    @Test
-//    public void find_Timestamp_OffsetInternal() throws Exception
-//    {
-//        String s = "[GC 53254.235: [ParNew (promotion failed): 3976407K->4348148K(4373760K), 0.2367350 secs]53254.472: [CMS53258.238: [CMS-concurrent-mark: ...";
-//
-//        int i = s.indexOf(":");
-//        Timestamp r = Timestamp.find(s, i, 7L);
-//        assertNotNull(r);
-//
-//        assertEquals(53254472L, r.getOffset().longValue());
-//        assertEquals(88, r.getStartPosition());
-//        assertEquals(97, r.getEndPosition());
-//        assertEquals("53254.472", r.getLiteral());
-//    }
-//
-//    @Test
-//    public void find_Timestamp_OffsetInternal1() throws Exception
-//    {
-//        String s = "]0.472 ...";
-//
-//        Timestamp r = Timestamp.find(s, 0, 7L);
-//        assertNotNull(r);
-//
-//        assertEquals(472L, r.getOffset().longValue());
-//        assertEquals(1, r.getStartPosition());
-//        assertEquals(6, r.getEndPosition());
-//        assertEquals("0.472", r.getLiteral());
-//    }
+    // Timestamp.isTimestamp() protected -------------------------------------------------------------------------------
 
+    @Test
+    public void isTimestamp_null() throws Exception
+    {
+        assertFalse(Timestamp.isTimestamp(null));
+    }
 
+    @Test
+    public void isTimestamp_Offset() throws Exception
+    {
+        assertTrue(Timestamp.isTimestamp("1.001"));
+    }
 
-//
-//    // Timestamp.isTimestamp() protected -------------------------------------------------------------------------------
-//
-//    @Test
-//    public void isTimestamp_null() throws Exception
-//    {
-//        assertFalse(Timestamp.isTimestamp(null));
-//    }
-//
-//    @Test
-//    public void isTimestamp_Offset() throws Exception
-//    {
-//        assertTrue(Timestamp.isTimestamp("1.001"));
-//    }
-//
-//    @Test
-//    public void isTimestamp_EXPLICIT_TIMESTAMP_FORMAT() throws Exception
-//    {
-//        assertTrue(Timestamp.isTimestamp("2014-08-14T01:12:28.621-0700"));
-//    }
-//
-//    @Test
-//    public void isTimestamp_SomethingElse() throws Exception
-//    {
-//        assertFalse(Timestamp.isTimestamp("CMS"));
-//    }
+    @Test
+    public void isTimestamp_EXPLICIT_TIMESTAMP_FORMAT() throws Exception
+    {
+        assertTrue(Timestamp.isTimestamp("2014-08-14T01:12:28.621-0700"));
+    }
 
-
-
-
-
-
-
-
-
-
-    //    @Test
-//    public void basic() throws Exception
-//    {
-//        Timestamp ts = new Timestamp("1.001", 2L, null, false);
-//
-//        assertEquals(1003L, ts.getTime().longValue());
-//        assertEquals(1001L, ts.getOffset().longValue());
-//        assertEquals("1.001", ts.getLiteral());
-//    }
-//
-//    @Test
-//    public void testEquals_SameOffset() throws Exception
-//    {
-//        Timestamp ts = new Timestamp("1.000", 7L, null, false);
-//        Timestamp ts2 = new Timestamp("1.000", 7L, null, false);
-//
-//        assertEquals(ts, ts2);
-//        assertEquals(ts2, ts);
-//    }
-//
-//    @Test
-//    public void testEquals_SameExplicitTimeStamp() throws Exception
-//    {
-//        Timestamp ts = new Timestamp("2013-10-10T14:33:21.747-0500: 7.954", null, null, false);
-//        Timestamp ts2 = new Timestamp("2013-10-10T14:33:21.747-0500: 7.954", null, null, false);
-//
-//        assertEquals(ts, ts2);
-//        assertEquals(ts2, ts);
-//    }
-//
-//    @Test
-//    public void testEquals_SameActualTime() throws Exception
-//    {
-//
-//        long origin = Timestamp.EXPLICIT_TIMESTAMP_FORMAT.parse("2001-01-01T01:01:01.000-0800").getTime();
-//
-//        Timestamp ts = new Timestamp("2001-01-01T01:01:01.001-0800: 7.954", null, null, false);
-//        Timestamp ts2 = new Timestamp("0.001", origin, null, false);
-//
-//        assertEquals(ts, ts2);
-//        assertEquals(ts2, ts);
-//    }
-//
-//    @Test
-//    public void noExplicitTimestampAndNoTimeOriginMeansFailure() throws Exception
-//    {
-//         try
-//         {
-//             new Timestamp("1.000", null, null, false);
-//             fail("should fail, no time origin");
-//         }
-//         catch(UserErrorException e)
-//         {
-//             log.info(e.getMessage());
-//         }
-//    }
-//
-//    // synthetic constructor -------------------------------------------------------------------------------------------
-//
-//    @Test
-//    public void syntheticConstructor() throws Exception
-//    {
-//        Timestamp t = new Timestamp(1L, 1L);
-//        assertEquals(1L, t.getTime().longValue());
-//        assertEquals(1L, t.getTime().longValue());
-//        assertEquals("0.001", t.getLiteral());
-//    }
-//
-//    @Test
-//    public void syntheticConstructor_2() throws Exception
-//    {
-//        Timestamp t = new Timestamp(11L, 10L);
-//        assertEquals(11L, t.getTime().longValue());
-//        assertEquals(10L, t.getTime().longValue());
-//        assertEquals("0.010", t.getLiteral());
-//    }
-//
-//    @Test
-//    public void syntheticConstructor_3() throws Exception
-//    {
-//        Timestamp t = new Timestamp(122L, 121L);
-//        assertEquals(122L, t.getTime().longValue());
-//        assertEquals(121L, t.getTime().longValue());
-//        assertEquals("0.121", t.getLiteral());
-//    }
-//
-//    @Test
-//    public void syntheticConstructor_4() throws Exception
-//    {
-//        Timestamp t = new Timestamp(1223L, 1222L);
-//        assertEquals(1223L, t.getTime().longValue());
-//        assertEquals(1222L, t.getTime().longValue());
-//        assertEquals("1.222", t.getLiteral());
-//    }
-//
-//    // explicit timestamp ----------------------------------------------------------------------------------------------
-//
-//    @Test
-//    public void explicitTimestamp() throws Exception
-//    {
-//        Timestamp t = new Timestamp("2013-10-10T14:33:21.747-0500: 7.954", null, null, false);
-//
-//        assertEquals("2013-10-10T14:33:21.747-0500", t.getExplicitTimestampLiteral());
-//        assertEquals("7.954", t.getLiteral());
-//        assertEquals(REFERENCE_TIMESTAMP_FORMAT.parse("13/10/10 14:33:21.747 -0500").getTime(), t.getTime().longValue());
-//    }
-//
-//    @Test
-//    public void invalidExplicitTimestamp() throws Exception
-//    {
-//        // valid, but unhandled pattern
-//        Timestamp t = new Timestamp("2013-10-10 14:33:21.747: 7.954", null, null, false);
-//
-//        assertEquals("2013-10-10 14:33:21.747", t.getExplicitTimestampLiteral());
-//        assertEquals("7.954", t.getLiteral());
-//        assertEquals(7954L, t.getTime().longValue());
-//    }
-//    @Test
-//    public void explicitTimestamp_BothExplicitAndOffsetPresentAndMatching() throws Exception
-//    {
-//        Long origin = REFERENCE_TIMESTAMP_FORMAT.parse("01/01/01 01:01:00.000 -0100").getTime();
-//
-//        Timestamp t = new Timestamp("2001-01-01T01:01:01.001-0100: 1.001", origin, null, false);
-//
-//        assertEquals("2001-01-01T01:01:01.001-0100", t.getExplicitTimestampLiteral());
-//        assertEquals("1.001", t.getLiteral());
-//        assertEquals(origin + 1001L, t.getTime().longValue());
-//    }
-//
-//    @Test
-//    public void explicitTimestamp_BothExplicitAndOffsetPresentAndInConflict() throws Exception
-//    {
-//        Long origin = REFERENCE_TIMESTAMP_FORMAT.parse("01/01/01 01:01:00.000 -0100").getTime();
-//
-//        // the mismatch is 1 ms
-//        Timestamp t = new Timestamp("2001-01-01T01:01:01.000-0100: 1.001", origin, null, false);
-//
-//        assertEquals("2001-01-01T01:01:01.000-0100", t.getExplicitTimestampLiteral());
-//        assertEquals("1.001", t.getLiteral());
-//        assertEquals(origin + 1000L, t.getTime().longValue()); // the explicit timestamp takes precedence
-//    }
-//
-//    @Test
-//    public void noExplicitTimestamp_NoTimeOrigin() throws Exception
-//    {
-//        try
-//        {
-//            new Timestamp("1.001", null, null, false);
-//            fail("should have failed");
-//        }
-//        catch(UserErrorException e)
-//        {
-//            log.info(e.getMessage());
-//        }
-//    }
+    @Test
+    public void isTimestamp_SomethingElse() throws Exception
+    {
+        assertFalse(Timestamp.isTimestamp("CMS"));
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

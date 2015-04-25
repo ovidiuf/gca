@@ -948,7 +948,7 @@ public class ExportCommandTest extends Assert
 
         List<GCEvent> events = new ArrayList<GCEvent>();
         events.add(new FullCollection(
-                new Timestamp("101.101", 0L, null, false), 1001L,
+                new Timestamp(101101L).applyTimeOrigin(0), 1001L,
                 new BeforeAfterMax(-1L, -1L, -1L, Unit.b), new BeforeAfterMax(-1L, -1L, -1L, Unit.b),
                 new BeforeAfterMax(-1L, -1L, -1L, Unit.b), new BeforeAfterMax(-1L, -1L, -1L, Unit.b), false));
 
@@ -1001,12 +1001,12 @@ public class ExportCommandTest extends Assert
         List<GCEvent> events = new ArrayList<GCEvent>();
 
         events.add(new FullCollection(
-                new Timestamp("101.101", 0L, null, false), 1001L,
+            new Timestamp(101101L).applyTimeOrigin(0), 1001L,
                 new BeforeAfterMax(-1L, 1L, -1L, Unit.b), new BeforeAfterMax(-1L, 10L, -1L, Unit.b),
                 new BeforeAfterMax(-1L, -1L, -1L, Unit.b), new BeforeAfterMax(-1L, -1L, -1L, Unit.b), false));
 
         events.add(new NewGenerationCollection(
-                new Timestamp("101.102", 0L, null, false), 1002L,
+            new Timestamp(101102L).applyTimeOrigin(0), 1002L,
                 new BeforeAfterMax(-1L, 2L, -1L, Unit.b), new BeforeAfterMax(-1L, -1L, -1L, Unit.b)));
 
         Series s = ec.toSeries(events);

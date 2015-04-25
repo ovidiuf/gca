@@ -442,7 +442,7 @@ public class FieldTypeTest extends Assert
     @Test
     public void testEvaluate_OFFSET_GCEvent_Contains() throws Exception
     {
-        GCEvent e = new FullCollection(new Timestamp("1.012", 0L, null, false), 1L, null, null, null, null, false);
+        GCEvent e = new FullCollection(new Timestamp(1012L), 1L, null, null, null, null, false);
         Value v = FieldType.OFFSET.evaluate(e);
         assertNotNull(v);
         assertEquals("1.012", v.getValue());
@@ -458,7 +458,7 @@ public class FieldTypeTest extends Assert
     @Test
     public void testEvaluate_NG_BEFORE_GCEvent_DoesNotContain() throws Exception
     {
-        GCEvent e = new FullCollection(new Timestamp("1.012", 0L, null, false), 1L, null, null, null, null, false);
+        GCEvent e = new FullCollection(new Timestamp(1012L), 1L, null, null, null, null, false);
         Value v = FieldType.NG_BEFORE.evaluate(e);
         assertNull(v);
     }
@@ -466,7 +466,7 @@ public class FieldTypeTest extends Assert
     @Test
     public void testEvaluate_NG_BEFORE_GCEvent_Contains() throws Exception
     {
-        GCEvent e = new FullCollection(new Timestamp("1.012", 0L, null, false), 1L, new BeforeAfterMax(2, 1, 3, Unit.G), null, null, null, false);
+        GCEvent e = new FullCollection(new Timestamp(1012L), 1L, new BeforeAfterMax(2, 1, 3, Unit.G), null, null, null, false);
         Value v = FieldType.NG_BEFORE.evaluate(e);
         assertNotNull(v);
         assertEquals(2L * 1024 * 1024 * 1024, v.getValue());
@@ -482,7 +482,7 @@ public class FieldTypeTest extends Assert
     @Test
     public void testEvaluate_OG_AFTER_GCEvent_DoesNotContain() throws Exception
     {
-        GCEvent e = new FullCollection(new Timestamp("1.012", 0L, null, false), 1L, null, null, null, null, false);
+        GCEvent e = new FullCollection(new Timestamp(1012L), 1L, null, null, null, null, false);
         Value v = FieldType.OG_AFTER.evaluate(e);
         assertNull(v);
     }
@@ -490,7 +490,7 @@ public class FieldTypeTest extends Assert
     @Test
     public void testEvaluate_OG_AFTER_GCEvent_Contains() throws Exception
     {
-        GCEvent e = new FullCollection(new Timestamp("1.012", 0L, null, false), 1L, null, new BeforeAfterMax(10, 7, 15, Unit.K), null, null, false);
+        GCEvent e = new FullCollection(new Timestamp(1012L), 1L, null, new BeforeAfterMax(10, 7, 15, Unit.K), null, null, false);
         Value v = FieldType.OG_AFTER.evaluate(e);
         assertNotNull(v);
         assertEquals(7L * 1024, v.getValue());
@@ -506,7 +506,7 @@ public class FieldTypeTest extends Assert
     @Test
     public void testEvaluate_PG_CAPACITY_GCEvent_DoesNotContain() throws Exception
     {
-        GCEvent e = new FullCollection(new Timestamp("1.012", 0L, null, false), 1L, null, null, null, null, false);
+        GCEvent e = new FullCollection(new Timestamp(1012L), 1L, null, null, null, null, false);
         Value v = FieldType.PG_CAPACITY.evaluate(e);
         assertNull(v);
     }
@@ -514,7 +514,7 @@ public class FieldTypeTest extends Assert
     @Test
     public void testEvaluate_PG_CAPACITY_GCEvent_Contains() throws Exception
     {
-        GCEvent e = new FullCollection(new Timestamp("1.012", 0L, null, false), 1L, null, null, new BeforeAfterMax(11, 13, 17, Unit.M), null, false);
+        GCEvent e = new FullCollection(new Timestamp(1012L), 1L, null, null, new BeforeAfterMax(11, 13, 17, Unit.M), null, false);
         Value v = FieldType.PG_CAPACITY.evaluate(e);
         assertNotNull(v);
         assertEquals(17L * 1024 * 1024, v.getValue());

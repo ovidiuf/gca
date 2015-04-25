@@ -36,7 +36,7 @@ public class FullCollectionParserTest extends Assert
 
         try
         {
-            p.parse(null, line, 78, null, null);
+            p.parse(null, line, 78, null);
             fail("should have failed with unrecognized format");
         }
         catch(ParserException e)
@@ -53,9 +53,9 @@ public class FullCollectionParserTest extends Assert
 
         FullCollectionParser p = new FullCollectionParser();
 
-        Timestamp ts = new Timestamp("1.000", 0L, null, false);
+        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0);;
 
-        FullCollection e = (FullCollection)p.parse(ts, line, -1, null, null);
+        FullCollection e = (FullCollection)p.parse(ts, line, -1, null);
 
         assertNotNull(e);
 
@@ -90,9 +90,9 @@ public class FullCollectionParserTest extends Assert
 
         FullCollectionParser p = new FullCollectionParser();
 
-        Timestamp ts = new Timestamp("1.000", 0L, null, false);
+        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0);;
 
-        FullCollection e = (FullCollection)p.parse(ts, line, -1, null, null);
+        FullCollection e = (FullCollection)p.parse(ts, line, -1, null);
 
         assertNotNull(e);
 
@@ -129,9 +129,9 @@ public class FullCollectionParserTest extends Assert
 
         FullCollectionParser p = new FullCollectionParser();
 
-        Timestamp ts = new Timestamp("1.000", 0L, null, false);
+        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0);;
 
-        FullCollection e = (FullCollection)p.parse(ts, line, -1, null, null);
+        FullCollection e = (FullCollection)p.parse(ts, line, -1, null);
 
         assertNotNull(e);
 
@@ -167,9 +167,9 @@ public class FullCollectionParserTest extends Assert
 
         FullCollectionParser p = new FullCollectionParser();
 
-        Timestamp ts = new Timestamp("1.000", 0L, null, false);
+        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0);;
 
-        FullCollection e = (FullCollection)p.parse(ts, line, -1, null, null);
+        FullCollection e = (FullCollection)p.parse(ts, line, -1, null);
 
         assertNotNull(e);
 
@@ -210,9 +210,9 @@ public class FullCollectionParserTest extends Assert
 
         FullCollectionParser p = new FullCollectionParser();
 
-        Timestamp ts = new Timestamp("1.000", 0L, null, false);
+        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0);;
 
-        FullCollection e = (FullCollection)p.parse(ts, line, -1, null, null);
+        FullCollection e = (FullCollection)p.parse(ts, line, -1, null);
 
         // for the time being, the parser simply ignores
         // [CMS-concurrent-mark: 5.274/5.371 secs] [Times: user=12.80 sys=0.36, real=5.37 secs] (concurrent mode failure): 11628290K->11661304K(11666432K), 23.5081640 secs]

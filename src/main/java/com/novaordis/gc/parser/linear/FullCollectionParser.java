@@ -9,7 +9,6 @@ import com.novaordis.gc.parser.GCEventParserBase;
 import com.novaordis.gc.parser.ParserException;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -38,10 +37,10 @@ public class FullCollectionParser extends GCEventParserBase
      * [Full GC [PSYoungGen: 1080K->1K(1398144K)] [PSOldGen: 4037629K->895254K(4194303K)] 4038710K->895254K(5592448K) [PSPermGen: 270279K->270279K(270336K)], 1.6447130 secs] [Times: user=1.64 sys=0.00, real=1.65 secs]
      * [Full GC (System) [PSYoungGen: 25762K->0K(887808K)] [ParOldGen: 377824K->217543K(1398144K)] 403587K->217543K(2285952K) [PSPermGen: 149513K->143503K(149696K)], 1.8638674 secs] [Times: user=5.80 sys=0.00, real=1.86 secs]
      *
-     * @see GCEventParser#parse(com.novaordis.gc.model.Timestamp, String, long, GCEvent, File)
+     * @see GCEventParser#parse(com.novaordis.gc.model.Timestamp, String, long, GCEvent)
      */
     @Override
-    public GCEvent parse(Timestamp ts, String line, long lineNumber, GCEvent current, File gcFile) throws ParserException
+    public GCEvent parse(Timestamp ts, String line, long lineNumber, GCEvent current) throws ParserException
     {
         if (!line.startsWith("[Full GC"))
         {
@@ -100,7 +99,7 @@ public class FullCollectionParser extends GCEventParserBase
                 String ogs = tokens.get(crtTokenIndex ++);
 
                 // sanity check - if we don't recognize the format, discard the line
-                int tokenLength = -1;
+                int tokenLength;
                 if (ogs.startsWith("PSOldGen: "))
                 {
                     tokenLength = "PSOldGen: ".length();

@@ -36,7 +36,7 @@ public class NewGenerationCollectionParserTest extends Assert
 
         try
         {
-            p.parse(null, line, 78, null, null);
+            p.parse(null, line, 78, null);
             fail("should have failed with unrecognized format");
         }
         catch(ParserException e)
@@ -54,9 +54,9 @@ public class NewGenerationCollectionParserTest extends Assert
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
-        Timestamp ts = new Timestamp("1.000", 0L, null, false);
+        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0L);
 
-        NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null, null);
+        NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null);
 
         assertNotNull(e);
 
@@ -81,9 +81,9 @@ public class NewGenerationCollectionParserTest extends Assert
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
-        Timestamp ts = new Timestamp("1.000", 0L, null, false);
+        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0L);
 
-        NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null, null);
+        NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null);
 
         assertNotNull(e);
 
@@ -114,11 +114,11 @@ public class NewGenerationCollectionParserTest extends Assert
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
-        Timestamp ts = new Timestamp("1.986", 0L, null, false);
+        Timestamp ts = new Timestamp(1986L);
 
         try
         {
-            p.parse(ts, line, 10, null, null);
+            p.parse(ts, line, 10, null);
             fail("should have thrown exception, mismatching offset");
         }
         catch(ParserException e)
@@ -135,9 +135,9 @@ public class NewGenerationCollectionParserTest extends Assert
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
-        Timestamp ts = new Timestamp("1.985", 0L, null, false);
+        Timestamp ts = new Timestamp(1985L).applyTimeOrigin(0);
 
-        NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null, null);
+        NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null);
 
         assertNotNull(e);
 
@@ -162,9 +162,9 @@ public class NewGenerationCollectionParserTest extends Assert
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
-        Timestamp ts = new Timestamp("1.985", 0L, null, false);
+        Timestamp ts = new Timestamp(1985L).applyTimeOrigin(0);
 
-        NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null, null);
+        NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null);
 
         assertNotNull(e);
 
@@ -189,9 +189,9 @@ public class NewGenerationCollectionParserTest extends Assert
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
-        Timestamp ts = new Timestamp("53795.248", 0L, null, false);
+        Timestamp ts = new Timestamp(53795248L).applyTimeOrigin(0);
 
-        NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null, null);
+        NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null);
 
         assertNotNull(e);
 
@@ -219,11 +219,11 @@ public class NewGenerationCollectionParserTest extends Assert
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
-        Timestamp ts = new Timestamp("27036.837", 0L, null, false);
+        Timestamp ts = new Timestamp(27036837L);
 
         try
         {
-            NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, 77L, null, null);
+            p.parse(ts, line, 77L, null);
             fail("should fail with ParserException as we're trying to parse a timestamp as heap info");
         }
         catch(ParserException e)
@@ -243,11 +243,11 @@ public class NewGenerationCollectionParserTest extends Assert
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
-        Timestamp ts = new Timestamp("29485.108", 0L, null, false);
+        Timestamp ts = new Timestamp(29485108L);
 
         try
         {
-            NewGenerationCollection e = (NewGenerationCollection) p.parse(ts, line, 77L, null, null);
+            p.parse(ts, line, 77L, null);
             fail("should fail with ParserException as we're trying to parse a timestamp as heap info");
         }
         catch(ParserException e)
@@ -268,9 +268,9 @@ public class NewGenerationCollectionParserTest extends Assert
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
-        Timestamp ts = new Timestamp("53233.950", 0L, null, false);
+        Timestamp ts = new Timestamp(53233950L).applyTimeOrigin(0);
 
-        NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null, null);
+        NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null);
 
         assertNotNull(e);
 
@@ -295,16 +295,17 @@ public class NewGenerationCollectionParserTest extends Assert
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
-        Timestamp ts = new Timestamp("53233.951", 0L, null, false);
+        Timestamp ts = new Timestamp(53233951L);
 
         try
         {
-            p.parse(ts, line, -1, null, null);
+            p.parse(ts, line, 77L, null);
             fail("should have failed with duplicated timestamp mismatch");
         }
-        catch(Exception e)
+        catch(ParserException e)
         {
             log.info(e.getMessage());
+            assertEquals(77L, e.getLineNumber());
         }
     }
 

@@ -71,9 +71,9 @@ public class CMSInitialMarkTest extends Assert
     {
         String line = "[GC [1 CMS-initial-mark: 0K(6291456K)] 268502K(8178944K), 0.1010040 secs] [Times: user=0.10 sys=0.00, real=0.10 secs]";
 
-        Timestamp ts = new Timestamp(0L, 1L);
+        Timestamp ts = new Timestamp(1L);
 
-        CMSInitialMark e = CMSParser.parseCMSInitialMark(ts, line, -1L, null);
+        CMSInitialMark e = CMSParser.parseCMSInitialMark(ts, line, -1L);
 
         assertNotNull(e);
         assertEquals(1L, e.getOffset().longValue());
@@ -97,9 +97,9 @@ public class CMSInitialMarkTest extends Assert
     {
         String line = "[GC [1 CMS-initial-mark: 0K(2088960K)] 322K(2097088K), 0.0020626 secs]";
 
-        Timestamp ts = new Timestamp(0L, 1L);
+        Timestamp ts = new Timestamp(1L);
 
-        CMSInitialMark e = CMSParser.parseCMSInitialMark(ts, line, -1L, null);
+        CMSInitialMark e = CMSParser.parseCMSInitialMark(ts, line, -1L);
 
         assertNotNull(e);
         assertEquals(1L, e.getOffset().longValue());

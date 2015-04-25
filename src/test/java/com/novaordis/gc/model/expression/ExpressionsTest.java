@@ -156,7 +156,7 @@ public class ExpressionsTest extends Assert
         Expression e = Expressions.parse("og-after/og-capacity*100");
         assertNotNull(e);
 
-        GCEvent gce = new FullCollection(new Timestamp("0.001", 0L, null, false),
+        GCEvent gce = new FullCollection(new Timestamp(1L),
                 1L, null, new BeforeAfterMax(1, 2, 8, Unit.G), null, null, false);
         SyntheticValue v = (SyntheticValue)e.evaluate(gce);
         assertEquals(25.00D, (Double)v.getValue(), 0.001);

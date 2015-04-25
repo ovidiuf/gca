@@ -49,13 +49,10 @@ public class NewGenerationCollectionParser extends GCEventParserBase
      * Note that at the time of writing, I did not know what the difference between "GC" and "GC--" is, and I am
      * considering them equivalent.
      *
-     *
-     * @param gcFile - for logging purposes only, can be null.
-     *
      * @see com.novaordis.gc.parser.GCEventParser#parse(com.novaordis.gc.model.Timestamp, String, long, GCEvent, File)
      */
     @Override
-    public GCEvent parse(Timestamp ts, String line, long lineNumber, GCEvent current, File gcFile) throws ParserException
+    public GCEvent parse(Timestamp ts, String line, long lineNumber, GCEvent current) throws ParserException
     {
         // all processing is done in a try/catch block, so we can cleanly handle parsing error (unrecognized lines,
         // for example)
@@ -76,16 +73,15 @@ public class NewGenerationCollectionParser extends GCEventParserBase
 
             String hs = tokens.get(0);
 
-            if (hs.matches("GC +\\d+\\.\\d+:"))
+            // sanity check: verify that line start offset precedes embedded offset
+            Timestamp embeddedOffset;
+            if (hs.startsWith("GC ") &&
+                ((embeddedOffset = Timestamp.find(hs.substring("GC ".length()) + " ", 0, lineNumber)) != null))
             {
-                // for CMS collector lines, verify that line start offset precedes embedded offset
-                hs = hs.replaceFirst("GC +", "");
-                hs = hs.substring(0, hs.length() - 1);
-                Timestamp embedded = new Timestamp(hs, 0L, gcFile, false);
-
-                if (ts.getOffset() > embedded.getOffset())
+                if (ts.getOffset() > embeddedOffset.getOffset())
                 {
-                    throw new Exception("embedded offset " + hs + " precedes line start offset " + ts.getLiteral());
+                    throw new ParserException(
+                        "embedded offset " + hs + " precedes line start offset " + ts.getLiteral(), lineNumber);
                 }
             }
 

@@ -11,9 +11,7 @@ import com.novaordis.gc.parser.Duration;
 import com.novaordis.gc.parser.GCEventParserBase;
 import com.novaordis.gc.parser.ParserException;
 import com.novaordis.gc.parser.linear.LineUtil;
-import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -25,17 +23,12 @@ public class CMSParser extends GCEventParserBase
 {
     // Constants -------------------------------------------------------------------------------------------------------
 
-    private static final Logger log = Logger.getLogger(CMSParser.class);
-
     // Static ----------------------------------------------------------------------------------------------------------
 
     /**
      * This method is invoked on a line after it was established that line contains "CMS-initial-mark".
-     *
-     * @param gcFile - for logging purposes only, can be safely null.
-     *
      */
-    public static CMSInitialMark parseCMSInitialMark(Timestamp ts, String line, long lineNumber, File gcFile)
+    public static CMSInitialMark parseCMSInitialMark(Timestamp ts, String line, long lineNumber)
         throws ParserException
     {
         List<String> tokens = LineUtil.toSquareBracketTokens(line, lineNumber);
@@ -88,10 +81,10 @@ public class CMSParser extends GCEventParserBase
      *
      * [CMS-concurrent-mark-start]
      *
-     * @see com.novaordis.gc.parser.GCEventParser#parse(com.novaordis.gc.model.Timestamp, String, long, GCEvent, File)
+     * @see com.novaordis.gc.parser.GCEventParser#parse(com.novaordis.gc.model.Timestamp, String, long, GCEvent)
      */
     @Override
-    public GCEvent parse(Timestamp ts, String line, long lineNumber, GCEvent current, File gcFile)
+    public GCEvent parse(Timestamp ts, String line, long lineNumber, GCEvent current)
         throws ParserException
     {
         // all processing of the known CMS logging output is done in a try/catch block, so we can cleanly handle parsing
@@ -102,7 +95,7 @@ public class CMSParser extends GCEventParserBase
             if (line.contains("CMS-initial-mark"))
             {
                 // this is the beginning of a CMS cycle
-                return parseCMSInitialMark(ts, line, lineNumber, gcFile);
+                return parseCMSInitialMark(ts, line, lineNumber);
             }
             else if (line.startsWith("[CMS-concurrent-mark-start"))
             {

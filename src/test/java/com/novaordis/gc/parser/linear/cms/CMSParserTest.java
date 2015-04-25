@@ -34,9 +34,9 @@ public class CMSParserTest extends Assert
 
         CMSParser p = new CMSParser();
 
-        Timestamp ts = new Timestamp(0L, 1L);
+        Timestamp ts = new Timestamp(1L);
 
-        CMSConcurrentMarkStart cms = (CMSConcurrentMarkStart)p.parse(ts, line, -1, null, null);
+        CMSConcurrentMarkStart cms = (CMSConcurrentMarkStart)p.parse(ts, line, -1, null);
 
         assertNotNull(cms);
         assertEquals(1L, cms.getOffset().longValue());
@@ -44,14 +44,6 @@ public class CMSParserTest extends Assert
 
         log.debug(".");
     }
-
-    // two events on the same line, the second is CMS ------------------------------------------------------------------
-
-//    @Test
-//    public void secondEventOnLine_CMSConcurrentPreclean() throws Exception
-//    {
-//        String line = "[CMS2014-08-14T01:12:29.867-0700: 27038.083: [CMS-concurrent-preclean: 4.167/17.484 secs] [Times: user=21.55 sys=2.82, real=17.48 secs]";
-//    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

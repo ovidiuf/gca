@@ -7,6 +7,8 @@ import com.novaordis.gc.parser.BeforeAfterMax;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * @author <a href="mailto:ovidiu@novaordis.com">Ovidiu Feodorov</a>
  *
@@ -29,7 +31,7 @@ public class FullCollectionTest extends GCEventTest
     @Test
     public void testFullConstructor() throws Exception
     {
-        Timestamp ts = new Timestamp("1.000", 0L, null, false);
+        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0);;
         BeforeAfterMax ng = new BeforeAfterMax("2K->1K(3K)", -1L);
         BeforeAfterMax og = new BeforeAfterMax("20K->10K(30K)", -1L);
         BeforeAfterMax pg = new BeforeAfterMax("200K->100K(300K)", -1L);

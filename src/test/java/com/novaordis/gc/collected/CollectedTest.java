@@ -45,7 +45,7 @@ public class CollectedTest extends Assert
 
         InputStreamReader isr = new InputStreamReader(is);
 
-        LinearScanParser p = new LinearScanParser(isr, null, false);
+        LinearScanParser p = new LinearScanParser(isr);
         p.installDefaultPipeline();
 
         List<GCEvent> events = p.parse(0L);
@@ -68,7 +68,7 @@ public class CollectedTest extends Assert
 
         InputStreamReader isr = new InputStreamReader(is);
 
-        LinearScanParser p = new LinearScanParser(isr, null, false);
+        LinearScanParser p = new LinearScanParser(isr);
         p.installDefaultPipeline();
 
         List<GCEvent> events = p.parse(1L);
@@ -105,7 +105,7 @@ public class CollectedTest extends Assert
 
         InputStreamReader isr = new InputStreamReader(is);
 
-        LinearScanParser p = new LinearScanParser(isr, null, false);
+        LinearScanParser p = new LinearScanParser(isr);
         p.installDefaultPipeline();
 
         Long timeOrigin = 1L;
@@ -129,7 +129,7 @@ public class CollectedTest extends Assert
 
         InputStreamReader isr = new InputStreamReader(is);
 
-        LinearScanParser p = new LinearScanParser(isr, null, false);
+        LinearScanParser p = new LinearScanParser(isr);
         p.installDefaultPipeline();
 
         Long timeOrigin = null;

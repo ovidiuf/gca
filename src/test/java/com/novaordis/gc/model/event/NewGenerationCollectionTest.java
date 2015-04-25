@@ -7,6 +7,8 @@ import com.novaordis.gc.parser.BeforeAfterMax;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+
 /**
  * @author <a href="mailto:ovidiu@novaordis.com">Ovidiu Feodorov</a>
  *
@@ -29,7 +31,7 @@ public class NewGenerationCollectionTest extends GCEventTest
     @Test
     public void testNGConstructor() throws Exception
     {
-        Timestamp ts = new Timestamp("2014-08-14T01:12:28.621-0700 27036.837", 1408003948621L, 27036837L, 0, 41);
+        Timestamp ts = Timestamp.find("2014-08-14T01:12:28.621-0700: 27036.837: ", 0, -1L);
 
         BeforeAfterMax ng = new BeforeAfterMax("2K->1K(3K)", -1L);
         BeforeAfterMax heap = new BeforeAfterMax("20K->10K(30K)", -1L);

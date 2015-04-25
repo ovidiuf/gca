@@ -21,22 +21,18 @@ public class GCLogParserFactory
 
     // Static ----------------------------------------------------------------------------------------------------------
 
-    public static GCLogParser getParser(Reader r) throws Exception
-    {
-        return getParser(r, null, false);
-    }
-
-    public static GCLogParser getParser(File f, boolean suppressTimestampWarning) throws Exception
+    public static GCLogParser getParser(File f) throws Exception
     {
         FileReader r = new FileReader(f);
-        return getParser(r, f, suppressTimestampWarning);
+        return getParser(r);
     }
 
-    public static GCLogParser getParser(Reader r, File f, boolean suppressTimestampWarning) throws Exception
+    public static GCLogParser getParser(Reader r) throws Exception
     {
-        LinearScanParser p = new LinearScanParser(r, f, suppressTimestampWarning);
+        LinearScanParser p = new LinearScanParser(r);
         p.installDefaultPipeline();
         p.addSecondLinePattern(Pattern.compile("\\s*\\(concurrent mode failure\\).*"));
+        log.debug("created " + p);
         return p;
     }
 

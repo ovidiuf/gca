@@ -1,10 +1,8 @@
 package com.novaordis.gc.model;
 
-import com.novaordis.gc.UserErrorException;
 import com.novaordis.gc.parser.ParserException;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.regex.Matcher;
@@ -29,10 +27,15 @@ public class Timestamp
 
     private static final Logger log = Logger.getLogger(Timestamp.class);
 
-    public static final DecimalFormat LITERAL_FORMAT = new DecimalFormat("0.000");
+
     public static final SimpleDateFormat EXPLICIT_TIMESTAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZ");
 
-    //
+
+
+
+
+
+
 
     public static final String DATESTAMP_FORMAT_LITERAL = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZ";
     public static final SimpleDateFormat DATESTAMP_FORMAT = new SimpleDateFormat(DATESTAMP_FORMAT_LITERAL);
@@ -40,9 +43,9 @@ public class Timestamp
     public static final String OFFSET_FORMAT_LITERAL = "#0.000";
     public static final DecimalFormat OFFSET_FORMAT = new DecimalFormat(OFFSET_FORMAT_LITERAL);
 
-    private static final Pattern OFFSET_PATTERN = Pattern.compile("\\d+\\.\\d\\d\\d: ");
-    private static final Pattern DATESTAMP_PATTERN = Pattern.compile("\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d-\\d\\d\\d\\d: ");
-    private static final Pattern COMBINED_PATTERN = Pattern.compile("\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d-\\d\\d\\d\\d: \\d+\\.\\d\\d\\d: ");
+    public static final Pattern OFFSET_PATTERN = Pattern.compile("\\d+\\.\\d\\d\\d: ");
+    public static final Pattern DATESTAMP_PATTERN = Pattern.compile("\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d-\\d\\d\\d\\d: ");
+    public static final Pattern COMBINED_PATTERN = Pattern.compile("\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d-\\d\\d\\d\\d: \\d+\\.\\d\\d\\d: ");
 
     // start with the combined pattern, to make sure it is found first
     private static final Pattern[] TIMESTAMP_PATTERNS = new Pattern[]
@@ -69,6 +72,20 @@ public class Timestamp
             return false;
         }
 
+    }
+
+    public static String longToOffsetLiteral(long offset)
+    {
+        String s = Long.toString(offset);
+        int count = 4 - s.length();
+        for(int i = 0; i < count; i ++)
+        {
+            s = "0" + s;
+        }
+
+        //noinspection UnnecessaryLocalVariable
+        String result = s.substring(0, s.length() - 3) + "." + s.substring(s.length() - 3);
+        return result;
     }
 
     public static long offsetToLong(String offset, Long lineNumber) throws ParserException
@@ -216,12 +233,13 @@ public class Timestamp
 
     // Attributes ------------------------------------------------------------------------------------------------------
 
-    private String literal;
-    private String explicitTimestampLiteral;
     private Long time;
     private Long offset;
+    private String literal;
+    private String dateStampLiteral;
+    private String offsetLiteral;
     private long explicitTimestampTime;
-    private boolean suppressTimestampWarning;
+    private String explicitTimestampLiteral;
 
     // the location in the original string where the time stamp started
     private int startPosition;
@@ -231,105 +249,62 @@ public class Timestamp
     // stamp in question
     private int endPosition;
 
-
-    // Constructors ------------------------------------------------------------------------------------------------------------------------
+    // Constructors ----------------------------------------------------------------------------------------------------
 
     /**
-     * @param rawTimestamp - the raw timestamp can ba a GC file offset in the format "999.999" or an explicit timestamp and an offset,
-     *                       separated by column.
+     * For testing only.
      *
-     * @param gcLogFile - for logging purposes only, it can safely be null
+     * If you want a Timestamp with the time correctly initialized, use this construct:
+     *
+     * <code>
+     *
+     *      Timestamp ts = new Timestamp(...).applyTimeOrigin(...);
+     *
+     * </code>
      */
-    public Timestamp(String rawTimestamp, Long timeOrigin, File gcLogFile, boolean suppressTimestampWarning) throws Exception
-    {
-        this.suppressTimestampWarning = suppressTimestampWarning;
-        this.time = timeOrigin == null ?  0L : timeOrigin;
-
-        this.explicitTimestampTime = -1;
-
-        int i = rawTimestamp.indexOf(": ");
-
-        if (i != -1)
-        {
-            // we got the explicit timestamp and the offset
-            this.explicitTimestampLiteral = rawTimestamp.substring(0, i);
-            this.literal = rawTimestamp.substring(i + 2);
-
-            // extract explicit timestamp
-            try
-            {
-                this.explicitTimestampTime = EXPLICIT_TIMESTAMP_FORMAT.parse(explicitTimestampLiteral).getTime();
-            }
-            catch(Exception e)
-            {
-                // we failed extracting the explicit timestamp, which means we encountered a format never seen before - or the GC file
-                // is simply incorrect
-                log.warn("unrecognized explicit timestamp \"" + explicitTimestampLiteral + "\", ignoring ...");
-            }
-        }
-        else
-        {
-            // no explicit timestamp, if we do not have a time origin, fail
-
-            if (timeOrigin == null)
-            {
-                throw new UserErrorException("no time origin was specified for " +
-                        (gcLogFile == null ? "this file" : gcLogFile.toString()) +
-                        ", and the file does not contain explicit timestamps, use -o|--time-origin or name the file according to a known pattern.");
-            }
-
-            this.literal = rawTimestamp;
-        }
-
-        this.offset = offsetToLong(this.literal, null);
-
-
-        if (explicitTimestampTime != -1)
-        {
-            // explicit timestamp present in the log file, use this with priority
-            this.time = explicitTimestampTime;
-
-            // if we have both the explicit timestamp AND the offset + time origin, make sure they match or warn
-            if (timeOrigin != null)
-            {
-                long diff = Math.abs(explicitTimestampTime - timeOrigin - offset);
-
-                if (diff != 0 && !suppressTimestampWarning)
-                {
-                    log.warn("the explicit timestamp \"" + explicitTimestampLiteral +
-                            "\" does not match the time calculated based on time origin and offset, the difference is " + diff + " ms");
-                }
-            }
-        }
-        else
-        {
-            this.time = this.time + offset;
-        }
-    }
-
-    public Timestamp(long time, long offset)
+    public Timestamp(long offset)
     {
         this.offset = offset;
-        this.time = time;
-        this.literal = LITERAL_FORMAT.format(((double)offset)/1000);
+        this.offsetLiteral = Timestamp.longToOffsetLiteral(offset);
+        this.literal = offsetLiteral;
     }
 
     /**
+     * This constructor is used by the static factories. Even if the parameters are supposed to be correct, we
+     * perform internal sanity checks.
+     *
+     * Protected for testing.
+     *
+     * @param startPosition - must be a valid position (>=0) otherwise the constructor throws
+     *                      an IllegalArgumentException
+     *
      * @param literal must be in sync with time/offset
+     *
+     * @exception java.lang.IllegalArgumentException
      */
-    public Timestamp(String literal, Long time, Long offset, int startPosition, int endPosition)
+    Timestamp(String literal, Long time, Long offset, int startPosition, int endPosition)
     {
-        if (offset != null)
-        {
-            if (literal == null)
-            {
-                throw new IllegalArgumentException("null literal for a " + offset + " offset");
-            }
-        }
-
         this.literal = literal;
         this.time = time;
         this.offset = offset;
+
+        processLiteral(literal, time, offset);
+
+        if (startPosition < 0)
+        {
+            throw new IllegalArgumentException("invalid start position " + startPosition);
+        }
+
+        int span = (time != null && offset != null) ? 3 : 2;
+
+        if (endPosition - startPosition != literal.length() + span)
+        {
+            // "1.000: "
+            throw new IllegalArgumentException(
+                "the difference between end position (" + endPosition + ") and start position (" + startPosition +
+                    ") should be the length of '" + literal + "' + " + span + " but it isn't");
+        }
+
         this.startPosition = startPosition;
         this.endPosition = endPosition;
     }
@@ -366,19 +341,15 @@ public class Timestamp
      */
     public String getOffsetLiteral()
     {
-        if (offset == null)
-        {
-            return null;
-        }
+        return offsetLiteral;
+    }
 
-        int i = literal.indexOf(' ');
-
-        if (i == -1)
-        {
-            return literal;
-        }
-
-        return literal.substring(i + 1);
+    /**
+     * @return may return null if the log file does not contain date stamps.
+     */
+    public String getDateStampLiteral()
+    {
+        return dateStampLiteral;
     }
 
     public int getStartPosition()
@@ -400,13 +371,17 @@ public class Timestamp
      *
      * In case the time is already set, the invocation is ignored. TODO: this is unusual, reconsider this
      *
+     * @return itself, to allow constructs like this:
+     *
+     * Timestamp ts = new Timestamp(...).applyTimeOrigin(...);
+     *
      */
-    public void applyTimeOrigin(long timeOrigin)
+    public Timestamp applyTimeOrigin(long timeOrigin)
     {
         if (time != null)
         {
             log.warn("applying time origin " + timeOrigin + " while the time is already set to " + time + ", IGNORED");
-            return;
+            return this;
         }
 
         if (offset == null)
@@ -415,6 +390,7 @@ public class Timestamp
         }
 
         time = offset + timeOrigin;
+        return this;
     }
 
     @Override
@@ -482,6 +458,80 @@ public class Timestamp
     }
 
     // Private ---------------------------------------------------------------------------------------------------------
+
+    private void processLiteral(String literal, Long time, Long offset)
+    {
+        if (literal == null)
+        {
+            throw new IllegalArgumentException("null literal");
+        }
+
+        if (time != null && offset != null)
+        {
+            // combined literal
+            this.dateStampLiteral = literal.substring(0, literal.indexOf(' '));
+            this.offsetLiteral = literal.substring(literal.indexOf(' ') + 1);
+        }
+        else if (time != null)
+        {
+            // date stamp literal
+            this.dateStampLiteral = literal;
+
+        }
+        else if (offset != null)
+        {
+            // offset literal
+            this.offsetLiteral = literal;
+
+        }
+        else
+        {
+            throw new IllegalArgumentException("both offset and time are null");
+        }
+
+        // check whether that data stamp literal matches the time
+
+        long tmp;
+
+        if (dateStampLiteral != null)
+        {
+            try
+            {
+                tmp = DATESTAMP_FORMAT.parse(dateStampLiteral).getTime();
+            }
+            catch(Exception e)
+            {
+                throw new IllegalArgumentException("invalid time literal '" + literal + "'", e);
+            }
+
+            //noinspection ConstantConditions
+            if (tmp != time)
+            {
+                throw new IllegalArgumentException("date stamp literal '" + dateStampLiteral + "' does not match time " + time);
+            }
+        }
+
+        // check whether the offset literal matches the offset
+
+        if (offsetLiteral != null)
+        {
+            try
+            {
+                tmp = offsetToLong(offsetLiteral, null);
+            }
+            catch (Exception e)
+            {
+                throw new IllegalArgumentException("invalid offset literal '" + literal + "'", e);
+            }
+
+            //noinspection ConstantConditions
+            if (tmp != offset)
+            {
+                throw new IllegalArgumentException("offset literal '" + offsetLiteral + "' does not match offset " + offset);
+            }
+        }
+
+    }
 
     // Inner classes ---------------------------------------------------------------------------------------------------
 }

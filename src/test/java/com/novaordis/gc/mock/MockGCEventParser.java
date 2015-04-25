@@ -4,8 +4,6 @@ import com.novaordis.gc.model.Timestamp;
 import com.novaordis.gc.model.event.GCEvent;
 import com.novaordis.gc.parser.GCEventParser;
 
-import java.io.File;
-
 /**
  * @author <a href="mailto:ovidiu@novaordis.com">Ovidiu Feodorov</a>
  *
@@ -38,7 +36,7 @@ public class MockGCEventParser implements GCEventParser
     }
 
     @Override
-    public GCEvent parse(Timestamp ts, String line, long lineNumber, GCEvent current, File gcFile) throws Exception
+    public GCEvent parse(Timestamp ts, String line, long lineNumber, GCEvent current) throws Exception
     {
         throw new RuntimeException("NOT YET IMPLEMENTED");
     }

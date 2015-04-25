@@ -57,8 +57,8 @@ public class ExpressionTreeTest extends Assert
         assertEquals("KB", h.getMeasureUnit());
         assertEquals("Old Generation Final Occupancy (KB)", h.getLabel());
 
-        GCEvent gce = new FullCollection(new Timestamp("1.000", 1L, null, false),
-                1L, null, new BeforeAfterMax(3, 2, 4, Unit.K), null, null, false);
+        GCEvent gce = new FullCollection(
+            new Timestamp(1L), 1L, null, new BeforeAfterMax(3, 2, 4, Unit.K), null, null, false);
 
         Value v = t.evaluate(gce);
         assertEquals(2L * 1024, ((Long) v.getValue()).longValue());
@@ -94,8 +94,8 @@ public class ExpressionTreeTest extends Assert
         assertEquals("Old Generation Final Occupancy/Old Generation Capacity", h.getLabel());
         assertNull(h.getMeasureUnit());
 
-        GCEvent gce = new FullCollection(new Timestamp("1.000", 1L, null, false),
-                1L, null, new BeforeAfterMax(3, 2, 4, Unit.K), null, null, false);
+        GCEvent gce = new FullCollection(
+            new Timestamp(1L), 1L, null, new BeforeAfterMax(3, 2, 4, Unit.K), null, null, false);
 
         Value v = t.evaluate(gce);
         assertEquals(0.5, (Double)v.getValue(), 0.0001);
@@ -139,23 +139,23 @@ public class ExpressionTreeTest extends Assert
         assertEquals("Old Generation Final Occupancy/Old Generation Capacity*100", h.getLabel());
         assertNull(h.getMeasureUnit());
 
-        GCEvent gce = new FullCollection(new Timestamp("1.000", 1L, null, false),
-                1L, null, new BeforeAfterMax(3, 2, 4, Unit.K), null, null, false);
+        GCEvent gce = new FullCollection(
+            new Timestamp(1L), 1L, null, new BeforeAfterMax(3, 2, 4, Unit.K), null, null, false);
 
         Value v = t.evaluate(gce);
         assertEquals(50.0D, (Double)v.getValue(), 0.0001);
         assertNull(v.getType());
     }
 
-    // evaluate() --------------------------------------------------------------------------------------------------------------------------
+    // evaluate() ------------------------------------------------------------------------------------------------------
 
     @Test
     public void testEvaluate_OneOperator_OneOperandCannotBeEvaluated() throws Exception
     {
         ExpressionTree t = new ExpressionTree("og-after/ng-capacity");
 
-        GCEvent gce = new FullCollection(new Timestamp("1.000", 1L, null, false),
-                1L, null, new BeforeAfterMax(3, 2, 4, Unit.K), null, null, false);
+        GCEvent gce = new FullCollection(
+            new Timestamp(1L), 1L, null, new BeforeAfterMax(3, 2, 4, Unit.K), null, null, false);
 
         assertNull(t.evaluate(gce));
     }
@@ -165,13 +165,12 @@ public class ExpressionTreeTest extends Assert
     {
         ExpressionTree t = new ExpressionTree("og-after/ng-capacity");
 
-        GCEvent gce = new FullCollection(new Timestamp("1.000", 1L, null, false),
-                1L, null, null, null, null, false);
+        GCEvent gce = new FullCollection(new Timestamp(1L), 1L, null, null, null, null, false);
 
         assertNull(t.evaluate(gce));
     }
 
-    // toHeader() --------------------------------------------------------------------------------------------------------------------------
+    // toHeader() ------------------------------------------------------------------------------------------------------
 
     /**
      * This test insures that a expression result that is a double produces a header that requests two decimal display.
@@ -180,17 +179,16 @@ public class ExpressionTreeTest extends Assert
     public void testDoubleExpressionDisplaysWithTwoDecimals() throws Exception
     {
         ExpressionTree t = new ExpressionTree("synthetic_double*1");
-
-        DoubleHeader h = (DoubleHeader)t.toHeader(null);
+        t.toHeader(null);
     }
 
-    // Package protected -------------------------------------------------------------------------------------------------------------------
+    // Package protected -----------------------------------------------------------------------------------------------
 
-    // Protected ---------------------------------------------------------------------------------------------------------------------------
+    // Protected -------------------------------------------------------------------------------------------------------
 
-    // Private -----------------------------------------------------------------------------------------------------------------------------
+    // Private ---------------------------------------------------------------------------------------------------------
 
-    // Inner classes -----------------------------------------------------------------------------------------------------------------------
+    // Inner classes ---------------------------------------------------------------------------------------------------
 }
 
 

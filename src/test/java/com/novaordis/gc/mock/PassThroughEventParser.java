@@ -4,8 +4,6 @@ import com.novaordis.gc.model.Timestamp;
 import com.novaordis.gc.model.event.GCEvent;
 import com.novaordis.gc.parser.GCEventParser;
 
-import java.io.File;
-
 /**
  * An event parser that simply wraps the line it receives into a MockCGEvent and returns it.
  *
@@ -40,7 +38,7 @@ public class PassThroughEventParser implements GCEventParser
     }
 
     @Override
-    public GCEvent parse(Timestamp ts, String line, long lineNumber, GCEvent current, File gcFile) throws Exception
+    public GCEvent parse(Timestamp ts, String line, long lineNumber, GCEvent current) throws Exception
     {
         return new MockGCEvent(ts, line, lineNumber);
     }

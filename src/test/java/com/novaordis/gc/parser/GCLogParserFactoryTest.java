@@ -3,7 +3,6 @@ package com.novaordis.gc.parser;
 import com.novaordis.gc.parser.linear.LinearScanParser;
 import com.novaordis.utilities.Files;
 import com.novaordis.utilities.testing.Tests;
-import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Test;
 
@@ -22,8 +21,6 @@ import static org.junit.Assert.assertTrue;
 public class GCLogParserFactoryTest
 {
     // Constants -------------------------------------------------------------------------------------------------------
-
-    private static final Logger log = Logger.getLogger(GCLogParserFactoryTest.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -46,7 +43,7 @@ public class GCLogParserFactoryTest
         File f = new File(d, "test");
         Files.write(f, "");
 
-        GCLogParser p = GCLogParserFactory.getParser(f, false);
+        GCLogParser p = GCLogParserFactory.getParser(f);
 
         assertTrue(p instanceof LinearScanParser);
 

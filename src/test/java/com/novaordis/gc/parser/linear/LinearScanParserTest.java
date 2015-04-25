@@ -184,7 +184,7 @@ public class LinearScanParserTest extends Assert
     {
         MockReader r = new MockReader("");
 
-        LinearScanParser p = new LinearScanParser(r, null, false);
+        LinearScanParser p = new LinearScanParser(r);
 
         assertNull(p.getPipeline());
 
@@ -198,7 +198,7 @@ public class LinearScanParserTest extends Assert
     {
         MockReader r = new MockReader("");
 
-        LinearScanParser p = new LinearScanParser(r, null, false);
+        LinearScanParser p = new LinearScanParser(r);
 
         assertNull(p.getPipeline());
 
@@ -216,7 +216,7 @@ public class LinearScanParserTest extends Assert
     {
         MockReader r = new MockReader("");
 
-        LinearScanParser p = new LinearScanParser(r, null, false);
+        LinearScanParser p = new LinearScanParser(r);
 
         assertNull(p.getPipeline());
 
@@ -237,7 +237,7 @@ public class LinearScanParserTest extends Assert
     {
         MockReader r = new MockReader("");
 
-        LinearScanParser p = new LinearScanParser(r, null, false);
+        LinearScanParser p = new LinearScanParser(r);
 
         assertNull(p.getPipeline());
 
@@ -264,7 +264,7 @@ public class LinearScanParserTest extends Assert
     {
         MockReader r = new MockReader("");
 
-        LinearScanParser p = new LinearScanParser(r, null, false);
+        LinearScanParser p = new LinearScanParser(r);
 
         p.installDefaultPipeline();
 
@@ -296,7 +296,7 @@ public class LinearScanParserTest extends Assert
 
         Reader r = new InputStreamReader(new ByteArrayInputStream(s.getBytes()));
 
-        LinearScanParser p = new LinearScanParser(r, null, false);
+        LinearScanParser p = new LinearScanParser(r);
         p.installPipeline(new PassThroughEventParser());
 
         List<GCEvent> events = p.parse(0L);
@@ -329,7 +329,7 @@ public class LinearScanParserTest extends Assert
 
         Reader r = new InputStreamReader(new ByteArrayInputStream(s.getBytes()));
 
-        LinearScanParser p = new LinearScanParser(r, null, false);
+        LinearScanParser p = new LinearScanParser(r);
         p.installPipeline(new PassThroughEventParser());
         p.addSecondLinePattern(Pattern.compile("^\\s*continuation of the previous line"));
 
@@ -365,7 +365,7 @@ public class LinearScanParserTest extends Assert
 
         Reader r = new InputStreamReader(new ByteArrayInputStream(s.getBytes()));
 
-        LinearScanParser p = new LinearScanParser(r, null, false);
+        LinearScanParser p = new LinearScanParser(r);
         p.installPipeline(new PassThroughEventParser());
         p.addSecondLinePattern(Pattern.compile("^\\s*continuation of the previous line"));
 
@@ -402,7 +402,7 @@ public class LinearScanParserTest extends Assert
 
         Reader r = new InputStreamReader(new ByteArrayInputStream(s.getBytes()));
 
-        LinearScanParser p = new LinearScanParser(r, null, false);
+        LinearScanParser p = new LinearScanParser(r);
         p.installPipeline(new PassThroughEventParser());
         p.addSecondLinePattern(Pattern.compile("^\\s*continuation of the previous line"));
 
@@ -430,7 +430,7 @@ public class LinearScanParserTest extends Assert
 
         Reader r = new InputStreamReader(new ByteArrayInputStream(s.getBytes()));
 
-        LinearScanParser p = new LinearScanParser(r, null, false);
+        LinearScanParser p = new LinearScanParser(r);
         p.installPipeline(new PassThroughEventParser());
         p.addSecondLinePattern(Pattern.compile("^\\s*continuation of the previous line"));
 
@@ -455,7 +455,7 @@ public class LinearScanParserTest extends Assert
 
         Reader r = new InputStreamReader(new ByteArrayInputStream(s.getBytes()));
 
-        LinearScanParser p = new LinearScanParser(r, null, false);
+        LinearScanParser p = new LinearScanParser(r);
         p.installPipeline(new PassThroughEventParser());
         p.addSecondLinePattern(Pattern.compile("^\\s*continuation of the previous line"));
 
@@ -477,7 +477,7 @@ public class LinearScanParserTest extends Assert
     @Test
     public void isTheSecondLineOfTheEvent_NullString() throws Exception
     {
-        LinearScanParser p = new LinearScanParser(null, null, false);
+        LinearScanParser p = new LinearScanParser(null);
 
         assertTrue(p.getSecondLinePatterns().isEmpty());
 
@@ -487,7 +487,7 @@ public class LinearScanParserTest extends Assert
     @Test
     public void isTheSecondLineOfTheEvent_ValidMatchAndNoMatch() throws Exception
     {
-        LinearScanParser p = new LinearScanParser(null, null, false);
+        LinearScanParser p = new LinearScanParser(null);
 
         p.addSecondLinePattern(Pattern.compile("^ [abc] $"));
         p.addSecondLinePattern(Pattern.compile("^ [xyz] $"));
@@ -502,7 +502,7 @@ public class LinearScanParserTest extends Assert
     @Test
     public void isTheSecondLineOfTheEvent_Match() throws Exception
     {
-        LinearScanParser p = new LinearScanParser(null, null, false);
+        LinearScanParser p = new LinearScanParser(null);
 
         p.addSecondLinePattern(Pattern.compile("\\s*\\(concurrent mode failure\\).*"));
 

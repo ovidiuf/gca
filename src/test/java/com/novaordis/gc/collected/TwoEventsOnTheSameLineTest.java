@@ -44,7 +44,7 @@ public class TwoEventsOnTheSameLineTest extends Assert
 
         InputStreamReader isr = new InputStreamReader(is);
 
-        LinearScanParser p = (LinearScanParser)GCLogParserFactory.getParser(isr, null, false);
+        LinearScanParser p = (LinearScanParser)GCLogParserFactory.getParser(isr);
 
         List<GCEvent> events = p.parse(0L);
 
@@ -87,7 +87,7 @@ public class TwoEventsOnTheSameLineTest extends Assert
 
         InputStreamReader isr = new InputStreamReader(is);
 
-        LinearScanParser p = (LinearScanParser)GCLogParserFactory.getParser(isr, null, false);
+        LinearScanParser p = (LinearScanParser)GCLogParserFactory.getParser(isr);
 
         List<GCEvent> events = p.parse(0L);
 

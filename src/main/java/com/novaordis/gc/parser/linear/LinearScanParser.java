@@ -10,7 +10,6 @@ import com.novaordis.gc.parser.linear.cms.CMSParser;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,10 +39,6 @@ public class LinearScanParser implements GCLogParser
 
     private Reader reader;
 
-    // optional - for reporting purposes only, can be null.
-    private File gcFile;
-    private boolean suppressTimestampWarning;
-
     // patterns to detect multi-line events
     private List<Pattern> multiLineEventPatterns;
 
@@ -55,16 +50,12 @@ public class LinearScanParser implements GCLogParser
      *
      * The parse() method will close the reader upon completion, whether the execution is successful or not.
      *
-     * @param gcFile file name for reporting purposes.
-     *
      * @see com.novaordis.gc.parser.linear.LinearScanParser#installDefaultPipeline()
      * @see com.novaordis.gc.parser.linear.LinearScanParser#installPipeline(com.novaordis.gc.parser.GCEventParser...)
      */
-    public LinearScanParser(Reader reader, File gcFile, boolean suppressTimestampWarning)
+    public LinearScanParser(Reader reader)
     {
         this.reader = reader;
-        this.gcFile = gcFile;
-        this.suppressTimestampWarning  = suppressTimestampWarning;
         this.multiLineEventPatterns = new ArrayList<Pattern>();
     }
 
@@ -153,7 +144,7 @@ public class LinearScanParser implements GCLogParser
 
                 try
                 {
-                    processLine(events, lineNumber++, timeOrigin, gcEvents, processorPipeline, gcFile, suppressTimestampWarning);
+                    processLine(events, lineNumber++, timeOrigin, gcEvents, processorPipeline);
                 }
                 catch(ParserException e)
                 {
@@ -282,14 +273,11 @@ public class LinearScanParser implements GCLogParser
 
     /**
      * Parse a line, which may contain multiple GC events.
-     *
-     * @param gcFile for reporting purposes only, it can be null.
-     *
+
      * @throws Exception
      */
     private static void processLine(String line, long lineNumber, Long timeOrigin,
-                                    List<GCEvent> events, GCEventParser processorPipeline,
-                                    File gcFile, boolean suppressTimestampWarning) throws Exception
+                                    List<GCEvent> events, GCEventParser processorPipeline) throws Exception
     {
         if (line == null)
         {
@@ -343,7 +331,7 @@ public class LinearScanParser implements GCLogParser
 
             String eventFragment = line.substring(fragmentStart, fragmentEnd);
 
-            parseEvent(ts, eventFragment, events, timeOrigin, processorPipeline, gcFile, suppressTimestampWarning, lineNumber);
+            parseEvent(ts, eventFragment, events, processorPipeline, lineNumber);
 
             from = fragmentEnd;
         }
@@ -357,9 +345,8 @@ public class LinearScanParser implements GCLogParser
      * @param eventFragment - guaranteed to contain data for a <b>single</b> GC event. If we identify a timestamp
      *                      in it, then there's something is wrong.
      */
-    private static void parseEvent(Timestamp ts, String eventFragment, List<GCEvent> events, Long timeOrigin,
-                                   GCEventParser processorPipeline, File gcFile, boolean suppressTimestampWarning,
-                                   long lineNumber) throws Exception
+    private static void parseEvent(Timestamp ts, String eventFragment, List<GCEvent> events,
+                                   GCEventParser processorPipeline, long lineNumber) throws Exception
     {
         // look up an appropriate parser - it's either one from the processing pipeline or the parser associated
         // with the last event, in the case of a multi-line event
@@ -377,7 +364,7 @@ public class LinearScanParser implements GCLogParser
 
         while (crtParser != null)
         {
-            GCEvent event = crtParser.parse(ts, eventFragment, lineNumber, crtEvent, gcFile);
+            GCEvent event = crtParser.parse(ts, eventFragment, lineNumber, crtEvent);
 
             if (event != null)
             {

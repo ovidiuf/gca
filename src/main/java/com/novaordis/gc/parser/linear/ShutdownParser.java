@@ -5,9 +5,6 @@ import com.novaordis.gc.model.event.Shutdown;
 import com.novaordis.gc.model.event.GCEvent;
 import com.novaordis.gc.parser.GCEventParserBase;
 import com.novaordis.gc.parser.ParserException;
-import org.apache.log4j.Logger;
-
-import java.io.File;
 
 /**
  * @author <a href="mailto:ovidiu@novaordis.com">Ovidiu Feodorov</a>
@@ -17,8 +14,6 @@ import java.io.File;
 public class ShutdownParser extends GCEventParserBase
 {
     // Constants ---------------------------------------------------------------------------------------------------------------------------
-
-    private static final Logger log = Logger.getLogger(ShutdownParser.class);
 
     // Static ------------------------------------------------------------------------------------------------------------------------------
 
@@ -41,10 +36,10 @@ public class ShutdownParser extends GCEventParserBase
      *  PSPermGen       total 265536K, used 265525K [0x0000000660000000, 0x0000000670350000, 0x0000000680000000)
      *   object space 265536K, 99% used [0x0000000660000000,0x000000067034d518,0x0000000670350000)
      *
-     * @see com.novaordis.gc.parser.GCEventParser#parse(com.novaordis.gc.model.Timestamp, String, long, GCEvent, File)
+     * @see com.novaordis.gc.parser.GCEventParser#parse(com.novaordis.gc.model.Timestamp, String, long, GCEvent)
      */
     @Override
-    public GCEvent parse(Timestamp ts, String line, long lineNumber, GCEvent event, File gcFile) throws ParserException
+    public GCEvent parse(Timestamp ts, String line, long lineNumber, GCEvent event) throws ParserException
     {
         if (event == null)
         {
