@@ -1,19 +1,20 @@
 package com.novaordis.gc.parser;
 
-import org.apache.log4j.Logger;
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author <a href="mailto:ovidiu@novaordis.com">Ovidiu Feodorov</a>
  *
  * Copyright 2013 Nova Ordis LLC
  */
-public class TimeOriginTest extends Assert
+public class TimeOriginTest
 {
     // Constants -------------------------------------------------------------------------------------------------------
-
-    private static final Logger log = Logger.getLogger(TimeOriginTest.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -24,25 +25,58 @@ public class TimeOriginTest extends Assert
     // Public ----------------------------------------------------------------------------------------------------------
 
     @Test
-    public void testDuration() throws Exception
+    public void constructor() throws Exception
     {
-        long ms = Duration.toLongMilliseconds("0.2210670 secs", -1L);
-        assertEquals(221L, ms);
+        TimeOrigin to = new TimeOrigin();
+        assertNull(to.get());
+        assertFalse(to.isInitialized());
     }
 
     @Test
-    public void weOnlyHandleSecs() throws Exception
+    public void constructorWithNullArgument() throws Exception
     {
-        try
-        {
-            Duration.toLongMilliseconds("0.2210670 years", 7L);
-            fail("should have failed because we only handle 'secs'");
-        }
-        catch(ParserException e)
-        {
-            log.info(e.getMessage());
-            assertEquals(7L, e.getLineNumber());
-        }
+        TimeOrigin to = new TimeOrigin(null);
+        assertNull(to.get());
+        assertFalse(to.isInitialized());
+    }
+
+    @Test
+    public void constructorWithNonNullArgument() throws Exception
+    {
+        TimeOrigin to = new TimeOrigin(1L);
+        assertEquals(1L, to.get().longValue());
+        assertTrue(to.isInitialized());
+    }
+
+    // initialize() ----------------------------------------------------------------------------------------------------
+
+    @Test
+    public void alreadyInitialized() throws Exception
+    {
+        TimeOrigin to = new TimeOrigin(1L);
+        assertTrue(to.isInitialized());
+
+        to.initialize(2L);
+
+        assertEquals(1L, to.get().longValue());
+        assertTrue(to.isInitialized());
+    }
+
+    @Test
+    public void initialize() throws Exception
+    {
+        TimeOrigin to = new TimeOrigin();
+        assertFalse(to.isInitialized());
+
+        to.initialize(2L);
+
+        assertEquals(2L, to.get().longValue());
+        assertTrue(to.isInitialized());
+
+        to.initialize(3L);
+
+        assertEquals(2L, to.get().longValue());
+        assertTrue(to.isInitialized());
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

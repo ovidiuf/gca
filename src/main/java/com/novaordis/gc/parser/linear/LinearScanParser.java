@@ -6,6 +6,7 @@ import com.novaordis.gc.parser.GCLogParser;
 import com.novaordis.gc.model.event.GCEvent;
 import com.novaordis.gc.model.Timestamp;
 import com.novaordis.gc.parser.ParserException;
+import com.novaordis.gc.parser.TimeOrigin;
 import com.novaordis.gc.parser.linear.cms.CMSParser;
 import org.apache.log4j.Logger;
 
@@ -73,10 +74,17 @@ public class LinearScanParser implements GCLogParser
      * For getActiveParser():
      *
      * @see com.novaordis.gc.model.event.GCEvent#getActiveParser()
+     *
+     * @see com.novaordis.gc.parser.GCLogParser#parse(com.novaordis.gc.parser.TimeOrigin)
      */
     @Override
-    public List<GCEvent> parse(Long timeOrigin) throws Exception
+    public List<GCEvent> parse(TimeOrigin timeOrigin) throws Exception
     {
+        if (timeOrigin == null)
+        {
+            throw new IllegalArgumentException("null time origin wrapper");
+        }
+
         List<GCEvent> gcEvents = new ArrayList<GCEvent>();
 
         BufferedReader br = null;
@@ -267,6 +275,51 @@ public class LinearScanParser implements GCLogParser
         return processorPipeline;
     }
 
+    /**
+     * We handle this in a separate method to be able to consistently catch NullPointerException in case we don't
+     * have a time origin and the time stamps need it - we need to turn this into an user error, which will bubble up
+     * all the way to CLI.
+     *
+     * Exposed as package protected for testing.
+     */
+    static void applyTimeOriginOnTimeStamps(TimeOrigin timeOrigin, Timestamp ts, Timestamp ts2, long lineNumber)
+        throws UserErrorException
+    {
+        try
+        {
+            if (ts != null)
+            {
+                // adjust time if necessary, otherwise it'll be a noop
+                ts.applyTimeOrigin(timeOrigin.get());
+            }
+
+            if (ts2 != null)
+            {
+                // adjust time if necessary, otherwise it'll be a noop
+                if (timeOrigin.isInitialized())
+                {
+                    ts2.applyTimeOrigin(timeOrigin.get());
+                }
+                else
+                {
+                    // the time origin is not initialized, but there's one more chance, it may be possible to infer
+                    // the time origin from the first timestamp; in the worst case we won't be able to get it and
+                    // we won't be worse than before
+                    Long value = ts == null ? null : ts.getTimeOrigin();
+                    if (value != null)
+                    {
+                        timeOrigin.initialize(value);
+                        ts2.applyTimeOrigin(value);
+                    }
+                }
+            }
+        }
+        catch(NullPointerException e)
+        {
+            throw new UserErrorException("the GC event specified on line " + lineNumber + " needs a time origin, which is not specified. See the 'Time Origin' section of the documentation");
+        }
+    }
+
     // Protected -------------------------------------------------------------------------------------------------------
 
     // Private ---------------------------------------------------------------------------------------------------------
@@ -277,7 +330,7 @@ public class LinearScanParser implements GCLogParser
      * @throws Exception
      * @throws com.novaordis.gc.UserErrorException
      */
-    private static void processLine(String line, long lineNumber, Long timeOrigin,
+    private static void processLine(String line, long lineNumber, TimeOrigin timeOrigin,
                                     List<GCEvent> events, GCEventParser processorPipeline) throws Exception
     {
         if (line == null)
@@ -326,7 +379,7 @@ public class LinearScanParser implements GCLogParser
 
             String eventFragment = line.substring(fragmentStart, fragmentEnd);
 
-            adjustTimeOriginOnTimeStamps(timeOrigin, ts, ts2, lineNumber);
+            applyTimeOriginOnTimeStamps(timeOrigin, ts, ts2, lineNumber);
 
             parseEvent(ts, eventFragment, events, processorPipeline, lineNumber);
 
@@ -384,34 +437,6 @@ public class LinearScanParser implements GCLogParser
         // we reached the bottom of the GCEventParser pipeline,  we weren't able to find any event in the fragment,
         // we don't know how to parse this log entry, bail out
         log.warn("don't know to parse line " + lineNumber + ", fragment \"" + eventFragment + "\"");
-    }
-
-    /**
-     * We handle this in a separate method to be able to consistently catch NullPointerException in case we don't
-     * have a time origin and the time stamps need it - we need to turn this into an user error, which will bubble up
-     * all the way to CLI.
-     */
-    private static void adjustTimeOriginOnTimeStamps(Long timeOrigin, Timestamp ts, Timestamp ts2, long lineNumber)
-        throws UserErrorException
-    {
-        try
-        {
-            if (ts != null)
-            {
-                // adjust time if necessary, otherwise it'll be a noop
-                ts.applyTimeOrigin(timeOrigin);
-            }
-
-            if (ts2 != null)
-            {
-                // adjust time if necessary, otherwise it'll be a noop
-                ts2.applyTimeOrigin(timeOrigin);
-            }
-        }
-        catch(NullPointerException e)
-        {
-            throw new UserErrorException("the GC event specified on line " + lineNumber + " needs a time origin, which is not specified. See the 'Time Origin' section of the documentation");
-        }
     }
 
     // Inner classes ---------------------------------------------------------------------------------------------------

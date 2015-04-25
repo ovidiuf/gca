@@ -113,6 +113,8 @@ public class Timestamp
      * Note that a valid timestamp occurs only at the beginning of the line or it is preceded by one of the following:
      * ']'
      *
+     * @param lineNumber null is fine, will be ignored.
+     *
      * @return a timestamp instance or null no time stamp is found.
      *
      * @exception java.lang.IllegalArgumentException on null string.
@@ -120,7 +122,7 @@ public class Timestamp
      * @exception java.lang.IllegalStateException if the found date stamp cannot be parsed with
      *            "yyyy-MM-dd'T'HH:mm:ss.SSS"
      */
-    public static Timestamp find(String s, int index, long lineNumber) throws ParserException
+    public static Timestamp find(String s, int index, Long lineNumber) throws ParserException
     {
         if (s == null)
         {
@@ -370,10 +372,17 @@ public class Timestamp
         return this;
     }
 
-    @Override
-    public String toString()
+    /**
+     * @return the time origin if it can ba calculated or null otherwise.
+     */
+    public Long getTimeOrigin()
     {
-        return literal;
+        if (time != null && offset != null)
+        {
+            return time - offset;
+        }
+
+        return null;
     }
 
     @Override
@@ -403,6 +412,31 @@ public class Timestamp
     public int hashCode()
     {
         return 17 + 5 * (int)(time == null ? 0L : time);
+    }
+
+    @Override
+    public String toString()
+    {
+        String result = null;
+
+        if (time != null)
+        {
+            result = DATESTAMP_FORMAT.format(time);
+        }
+
+        if (offset != null)
+        {
+            if (result == null)
+            {
+                result = longToOffsetLiteral(offset);
+            }
+            else
+            {
+                result += " " + longToOffsetLiteral(offset);
+            }
+        }
+
+        return result;
     }
 
     // Package protected -----------------------------------------------------------------------------------------------

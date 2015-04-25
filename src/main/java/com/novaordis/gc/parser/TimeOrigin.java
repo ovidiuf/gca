@@ -1,7 +1,8 @@
 package com.novaordis.gc.parser;
 
 /**
- * Static utility that converts "0.2210670 secs" into duration information (long milliseconds)
+ * A mutable (once) time origin that is maintained during a parsing cycle. It is necessary because we might need to
+ * infer it at a certain point during parsing and then use it going forward.
  *
  * @author <a href="mailto:ovidiu@novaordis.com">Ovidiu Feodorov</a>
  *
@@ -13,32 +14,54 @@ public class TimeOrigin
 
     // Static ----------------------------------------------------------------------------------------------------------
 
-    /**
-     * Static utility that converts "0.2210670 secs" into duration information (long milliseconds), performing all
-     * necessary rounding.
-     *
-     * @throws com.novaordis.gc.parser.ParserException
-     */
-    public static long toLongMilliseconds(String s, long lineNumber) throws ParserException
-    {
-        // we currently only handle 'secs', everything else is handled as a parsing error
-
-        if (!s.endsWith(" secs"))
-        {
-            throw new ParserException("we can only handle 'secs', but we got \"" + s + "\"", lineNumber);
-        }
-
-        s = s.substring(0, s.length() - " secs".length()).trim();
-        //noinspection UnnecessaryLocalVariable
-        long duration = Math.round(Float.parseFloat(s) * 1000);
-        return duration;
-    }
-
     // Attributes ------------------------------------------------------------------------------------------------------
+
+    private Long timeOrigin;
 
     // Constructors ----------------------------------------------------------------------------------------------------
 
+    public TimeOrigin()
+    {
+        this(null);
+    }
+
+    public TimeOrigin(Long timeOrigin)
+    {
+        this.timeOrigin = timeOrigin;
+    }
+
     // Public ----------------------------------------------------------------------------------------------------------
+
+    /**
+     * @return null if there is no know time origin.
+     */
+    public Long get()
+    {
+        return timeOrigin;
+    }
+
+    public boolean isInitialized()
+    {
+        return timeOrigin != null;
+    }
+
+    /**
+     * The operation is idempotent - the instance can be initialized only once - only if the wrapped value is null.
+     * All other subsequent invocations will be noops.
+     */
+    public void initialize(Long value)
+    {
+        if (timeOrigin == null)
+        {
+            timeOrigin = value;
+        }
+    }
+
+    @Override
+    public String toString()
+    {
+        return timeOrigin == null ? "UNINITIALIZED" : timeOrigin.toString();
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

@@ -116,16 +116,18 @@ public class FullCollectionParser extends GCEventParserBase
                 ogs = ogs.substring(tokenLength);
                 og = new BeforeAfterMax(ogs, lineNumber);
             }
-            else if (tok.startsWith("CMS: "))
+            else if (tok.startsWith("CMS: ") || tok.startsWith("CMS (concurrent mode failure): "))
             {
                 //
                 // CMS: 468402K->442325K(2516608K), 2.3616630 secs
+                // CMS (concurrent mode failure): 818968K->805559K(819200K), 1.7087940 secs
                 //
 
-                String cmsOg = tok;
-                cmsOg = cmsOg.substring("CMS: ".length());
+                int i = tok.indexOf(':');
 
-                int i = cmsOg.indexOf(", ");
+                String cmsOg = tok.substring(i + 1).trim();
+
+                i = cmsOg.indexOf(", ");
 
                 // currently we discard the time information that comes right after the before/after group and comma
 
@@ -146,6 +148,10 @@ public class FullCollectionParser extends GCEventParserBase
 //         (concurrent mode failure): 11628290K->11661304K(11666432K), 23.5081640 secs] 15947092K->12535361K(16040192K), [CMS Perm : 117651K->117651K(208152K)], 23.5087140 secs] [Times: user=27.85 sys=0.31, real=23.51 secs]
                 log.debug("ENCOUNTERED FULL COLLECTION THAT CONTAINS CMS-concurrent-mark");
                 // the code below will parse
+            }
+            else if (tok.contains("CMS-concurrent-sweep"))
+            {
+                log.debug("ENCOUNTERED FULL COLLECTION THAT CONTAINS CMS-concurrent-mark");
             }
             else
             {
@@ -185,6 +191,12 @@ public class FullCollectionParser extends GCEventParserBase
             //
 
             String durations = tokens.get(crtTokenIndex);
+            // sometimes I get 'icms_dc' here, so go one more step
+            if (durations.contains("icms_dc"))
+            {
+                durations = tokens.get(++crtTokenIndex);
+            }
+
             i = durations.indexOf("secs");
             if (i != -1)
             {

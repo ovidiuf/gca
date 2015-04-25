@@ -2,9 +2,8 @@ package com.novaordis.gc.parser.linear;
 
 import com.novaordis.gc.model.FieldType;
 import com.novaordis.gc.model.Timestamp;
+import com.novaordis.gc.model.event.GCEvent;
 import com.novaordis.gc.model.event.NewGenerationCollection;
-import com.novaordis.gc.parser.ParserException;
-import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,17 +14,15 @@ import org.junit.Test;
  */
 public class NewGenerationCollectionParserTest extends Assert
 {
-    // Constants ---------------------------------------------------------------------------------------------------------------------------
+    // Constants -------------------------------------------------------------------------------------------------------
 
-    private static final Logger log = Logger.getLogger(NewGenerationCollectionParserTest.class);
+    // Static ----------------------------------------------------------------------------------------------------------
 
-    // Static ------------------------------------------------------------------------------------------------------------------------------
+    // Attributes ------------------------------------------------------------------------------------------------------
 
-    // Attributes --------------------------------------------------------------------------------------------------------------------------
+    // Constructors ----------------------------------------------------------------------------------------------------
 
-    // Constructors ------------------------------------------------------------------------------------------------------------------------
-
-    // Public ------------------------------------------------------------------------------------------------------------------------------
+    // Public ----------------------------------------------------------------------------------------------------------
 
     @Test
     public void testUnrecognized() throws Exception
@@ -34,16 +31,10 @@ public class NewGenerationCollectionParserTest extends Assert
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
-        try
-        {
-            p.parse(null, line, 78, null);
-            fail("should have failed with unrecognized format");
-        }
-        catch(ParserException e)
-        {
-            assertEquals(78, e.getLineNumber());
-            log.info(e.getMessage());
-        }
+        GCEvent event = p.parse(null, line, 78, null);
+
+        // temporarily dropping this line as unparseable
+        assertNull(event);
     }
 
     // && !line.startsWith("[GC-- [PSYoungGen")
@@ -110,16 +101,9 @@ public class NewGenerationCollectionParserTest extends Assert
 
         Timestamp ts = new Timestamp(1986L);
 
-        try
-        {
-            p.parse(ts, line, 10, null);
-            fail("should have thrown exception, mismatching offset");
-        }
-        catch(ParserException e)
-        {
-            log.info(e.getMessage());
-            assertEquals(10, e.getLineNumber());
-        }
+        GCEvent event = p.parse(ts, line, 10, null);
+
+        assertNull("should have bailed out on the event, mismatching offset", event);
     }
 
     @Test
@@ -215,16 +199,9 @@ public class NewGenerationCollectionParserTest extends Assert
 
         Timestamp ts = new Timestamp(27036837L);
 
-        try
-        {
-            p.parse(ts, line, 77L, null);
-            fail("should fail with ParserException as we're trying to parse a timestamp as heap info");
-        }
-        catch(ParserException e)
-        {
-            log.info(e.getMessage());
-            assertEquals(77L, e.getLineNumber());
-        }
+        GCEvent event = p.parse(ts, line, 77L, null);
+
+        assertNull("should bail on the event as we're trying to parse a timestamp as heap info", event);
     }
 
     @Test
@@ -239,16 +216,9 @@ public class NewGenerationCollectionParserTest extends Assert
 
         Timestamp ts = new Timestamp(29485108L);
 
-        try
-        {
-            p.parse(ts, line, 77L, null);
-            fail("should fail with ParserException as we're trying to parse a timestamp as heap info");
-        }
-        catch(ParserException e)
-        {
-            log.info(e.getMessage());
-            assertEquals(77L, e.getLineNumber());
-        }
+        GCEvent event = p.parse(ts, line, 77L, null);
+
+        assertNull("should bail on the event as we're trying to parse a timestamp as heap info", event);
     }
 
     @Test
@@ -287,16 +257,10 @@ public class NewGenerationCollectionParserTest extends Assert
 
         Timestamp ts = new Timestamp(53233951L);
 
-        try
-        {
-            p.parse(ts, line, 77L, null);
-            fail("should have failed with duplicated timestamp mismatch");
-        }
-        catch(ParserException e)
-        {
-            log.info(e.getMessage());
-            assertEquals(77L, e.getLineNumber());
-        }
+        GCEvent event = p.parse(ts, line, 77L, null);
+
+        // temporarily dropping this line as unparseable
+        assertNull(event);
     }
 
     @Test
@@ -325,6 +289,33 @@ public class NewGenerationCollectionParserTest extends Assert
 
         assertEquals(42, e.getDuration(), 0.01);
     }
+
+    @Test
+    public void testDefNew_PromotionFailed() throws Exception
+    {
+        String line = "[GC 1080.181: [DefNew (promotion failed) : 256020K->243246K(307200K), 0.0986650 secs]";
+
+        NewGenerationCollectionParser p = new NewGenerationCollectionParser();
+
+        Timestamp ts = new Timestamp(1080181L);
+
+        NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, 7L, null);
+
+        assertNotNull(e);
+
+        assertEquals(-1L, e.getTime().longValue());
+        assertEquals(1080181L, e.getOffset().longValue());
+
+        assertEquals("promotion failed", e.get(FieldType.NOTES).getValue());
+
+        assertEquals(256020L * 1024, e.get(FieldType.NG_BEFORE).getValue());
+        assertEquals(243246L * 1024, e.get(FieldType.NG_AFTER).getValue());
+        assertEquals(307200L * 1024, e.get(FieldType.NG_CAPACITY).getValue());
+
+        assertNull(e.get(FieldType.HEAP_CAPACITY));
+        assertEquals(99, e.getDuration(), 0.01);
+    }
+
 
     // Package protected -------------------------------------------------------------------------------------------------------------------
 

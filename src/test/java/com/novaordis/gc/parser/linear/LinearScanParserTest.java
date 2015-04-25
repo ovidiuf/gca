@@ -6,12 +6,14 @@ import com.novaordis.gc.mock.MockGCEventParser;
 import com.novaordis.gc.mock.MockReader;
 import com.novaordis.gc.mock.PassThroughEventParser;
 import com.novaordis.gc.model.FieldType;
+import com.novaordis.gc.model.Timestamp;
 import com.novaordis.gc.model.event.FullCollection;
 import com.novaordis.gc.model.event.GCEvent;
 import com.novaordis.gc.model.event.NewGenerationCollection;
 import com.novaordis.gc.parser.GCEventParser;
 import com.novaordis.gc.parser.GCLogParser;
 import com.novaordis.gc.parser.GCLogParserFactory;
+import com.novaordis.gc.parser.TimeOrigin;
 import com.novaordis.gc.parser.linear.cms.CMSParser;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
@@ -55,7 +57,7 @@ public class LinearScanParserTest extends Assert
         GCLogParser p = GCLogParserFactory.getParser(r);
         assertTrue(p instanceof LinearScanParser);
 
-        List<GCEvent> events = p.parse(1000L);
+        List<GCEvent> events = p.parse(new TimeOrigin(1000L));
 
         r.close();
 
@@ -102,7 +104,7 @@ public class LinearScanParserTest extends Assert
         GCLogParser p = GCLogParserFactory.getParser(r);
         assertTrue(p instanceof LinearScanParser);
 
-        List<GCEvent> events = p.parse(1000L);
+        List<GCEvent> events = p.parse(new TimeOrigin(1000L));
 
         r.close();
 
@@ -153,7 +155,7 @@ public class LinearScanParserTest extends Assert
         GCLogParser p = GCLogParserFactory.getParser(r);
         assertTrue(p instanceof LinearScanParser);
 
-        List<GCEvent> events = p.parse(0L);
+        List<GCEvent> events = p.parse(new TimeOrigin(0L));
 
         assertTrue(r.isClosed());
 
@@ -169,7 +171,7 @@ public class LinearScanParserTest extends Assert
         GCLogParser p = GCLogParserFactory.getParser(r);
         assertTrue(p instanceof LinearScanParser);
 
-        List<GCEvent> events = p.parse(0L);
+        List<GCEvent> events = p.parse(new TimeOrigin(0L));
 
         assertTrue(r.isClosed());
 
@@ -291,15 +293,15 @@ public class LinearScanParserTest extends Assert
     {
         String s =
             "a\n" +
-            "b\n" +
-            "c";
+                "b\n" +
+                "c";
 
         Reader r = new InputStreamReader(new ByteArrayInputStream(s.getBytes()));
 
         LinearScanParser p = new LinearScanParser(r);
         p.installPipeline(new PassThroughEventParser());
 
-        List<GCEvent> events = p.parse(0L);
+        List<GCEvent> events = p.parse(new TimeOrigin(0L));
 
         r.close();
 
@@ -323,9 +325,9 @@ public class LinearScanParserTest extends Assert
     {
         String s =
             "a\n" +
-            "b\n" +
-            " continuation of the previous line\n" +
-            "c";
+                "b\n" +
+                " continuation of the previous line\n" +
+                "c";
 
         Reader r = new InputStreamReader(new ByteArrayInputStream(s.getBytes()));
 
@@ -333,7 +335,7 @@ public class LinearScanParserTest extends Assert
         p.installPipeline(new PassThroughEventParser());
         p.addSecondLinePattern(Pattern.compile("^\\s*continuation of the previous line"));
 
-        List<GCEvent> events = p.parse(0L);
+        List<GCEvent> events = p.parse(new TimeOrigin(0L));
 
         r.close();
 
@@ -357,11 +359,11 @@ public class LinearScanParserTest extends Assert
     {
         String s =
             "a\n" +
-            "b\n" +
-            " continuation of the previous line\n" +
-            "c\n" +
-            " continuation of the previous line\n" +
-            "d\n";
+                "b\n" +
+                " continuation of the previous line\n" +
+                "c\n" +
+                " continuation of the previous line\n" +
+                "d\n";
 
         Reader r = new InputStreamReader(new ByteArrayInputStream(s.getBytes()));
 
@@ -369,7 +371,7 @@ public class LinearScanParserTest extends Assert
         p.installPipeline(new PassThroughEventParser());
         p.addSecondLinePattern(Pattern.compile("^\\s*continuation of the previous line"));
 
-        List<GCEvent> events = p.parse(0L);
+        List<GCEvent> events = p.parse(new TimeOrigin(0L));
 
         r.close();
 
@@ -397,8 +399,8 @@ public class LinearScanParserTest extends Assert
     {
         String s =
             "a\n" +
-            " continuation of the previous line\n" +
-            "c";
+                " continuation of the previous line\n" +
+                "c";
 
         Reader r = new InputStreamReader(new ByteArrayInputStream(s.getBytes()));
 
@@ -406,7 +408,7 @@ public class LinearScanParserTest extends Assert
         p.installPipeline(new PassThroughEventParser());
         p.addSecondLinePattern(Pattern.compile("^\\s*continuation of the previous line"));
 
-        List<GCEvent> events = p.parse(0L);
+        List<GCEvent> events = p.parse(new TimeOrigin(0L));
 
         r.close();
 
@@ -434,7 +436,7 @@ public class LinearScanParserTest extends Assert
         p.installPipeline(new PassThroughEventParser());
         p.addSecondLinePattern(Pattern.compile("^\\s*continuation of the previous line"));
 
-        List<GCEvent> events = p.parse(0L);
+        List<GCEvent> events = p.parse(new TimeOrigin(0L));
 
         r.close();
 
@@ -451,7 +453,7 @@ public class LinearScanParserTest extends Assert
         String s =
             "a\n" +
                 " continuation of the previous line\n" +
-            " continuation of the previous line";
+                " continuation of the previous line";
 
         Reader r = new InputStreamReader(new ByteArrayInputStream(s.getBytes()));
 
@@ -463,7 +465,7 @@ public class LinearScanParserTest extends Assert
 
         try
         {
-            p.parse(0L);
+            p.parse(new TimeOrigin(0L));
             fail("should have failed with UserErrorException, two successive 'multi-lines'");
         }
         catch(UserErrorException e)
@@ -513,6 +515,53 @@ public class LinearScanParserTest extends Assert
         log.debug(".");
     }
 
+    // applyTimeOriginOnTimeStamps() -----------------------------------------------------------------------------------
+
+    @Test
+    public void applyTimeOriginOnTimeStamps_NullTimeOriginOnDateStampTimestamps() throws Exception
+    {
+        TimeOrigin timeOrigin = new TimeOrigin();
+
+        String line = "2015-01-01T01:01:01.111-0700: [blah]2015-02-02T02:02:02.222-0700: [blah2]";
+        Timestamp ts = Timestamp.find(line, 0, 7L);
+        Timestamp ts2 = Timestamp.find(line, ts.getEndPosition(), 7L);
+
+
+        LinearScanParser.applyTimeOriginOnTimeStamps(timeOrigin, ts, ts2, 7L);
+
+        // this is a noop
+        assertEquals(ts.getTime().longValue(), Timestamp.DATESTAMP_FORMAT.parse("2015-01-01T01:01:01.111-0700").getTime());
+        assertEquals(ts2.getTime().longValue(), Timestamp.DATESTAMP_FORMAT.parse("2015-02-02T02:02:02.222-0700").getTime());
+    }
+
+    @Test
+    public void applyTimeOriginOnTimeStamps_NullTimeOriginOnMixedTimestamps() throws Exception
+    {
+        TimeOrigin timeOrigin = new TimeOrigin();
+
+        String line = "2015-01-01T01:01:01.111-0700: 1.000: [blah]2.000: [blah2]";
+
+        Timestamp ts = Timestamp.find(line, 0, 7L);
+        Timestamp ts2 = Timestamp.find(line, ts.getEndPosition(), 7L);
+
+        long time = ts.getTime();
+        assertNull(ts2.getTime());
+
+        //
+        // we make sure we use the time from the first time stamp
+        //
+
+        LinearScanParser.applyTimeOriginOnTimeStamps(timeOrigin, ts, ts2, 7L);
+
+        long timeAfter = ts.getTime();
+
+        // make sure nothing happened to ts
+        assertEquals(time, timeAfter);
+
+        long time2After = ts2.getTime();
+
+        assertEquals(time2After, Timestamp.DATESTAMP_FORMAT.parse("2015-01-01T01:01:02.111-0700").getTime());
+    }
 
     // Package protected -----------------------------------------------------------------------------------------------
 

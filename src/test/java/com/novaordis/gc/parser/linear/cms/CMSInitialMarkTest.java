@@ -6,6 +6,7 @@ import com.novaordis.gc.model.Timestamp;
 import com.novaordis.gc.model.event.GCEvent;
 import com.novaordis.gc.model.event.cms.CMSInitialMark;
 import com.novaordis.gc.parser.GCLogParserFactory;
+import com.novaordis.gc.parser.TimeOrigin;
 import com.novaordis.gc.parser.linear.LinearScanParser;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
@@ -41,7 +42,7 @@ public class CMSInitialMarkTest extends Assert
 
         LinearScanParser p = (LinearScanParser)GCLogParserFactory.getParser(new StringReader(line));
 
-        List<GCEvent> events = p.parse(0L);
+        List<GCEvent> events = p.parse(new TimeOrigin(0L));
 
         assertEquals(1, events.size());
 

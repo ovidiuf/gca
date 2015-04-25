@@ -5,6 +5,7 @@ import com.novaordis.gc.model.FieldType;
 import com.novaordis.gc.model.event.*;
 import com.novaordis.gc.parser.GCLogParser;
 import com.novaordis.gc.parser.GCLogParserFactory;
+import com.novaordis.gc.parser.TimeOrigin;
 import com.novaordis.gc.parser.linear.LinearScanParser;
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -50,7 +51,7 @@ public class CompleteEventSampleTest
         GCLogParser p = GCLogParserFactory.getParser(isr);
         assertTrue(p instanceof LinearScanParser);
 
-        List<GCEvent> events = p.parse(0L);
+        List<GCEvent> events = p.parse(new TimeOrigin(0L));
 
         assertEquals(9, events.size());
 

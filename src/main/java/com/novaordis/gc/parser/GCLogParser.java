@@ -10,5 +10,8 @@ import java.util.List;
  */
 public interface GCLogParser
 {
-    List<GCEvent> parse(Long timeOrigin) throws Exception;
+    /**
+     * @param timeOrigin must be not null, even if the wrapped time origin value is null.
+     */
+    List<GCEvent> parse(TimeOrigin timeOrigin) throws Exception;
 }

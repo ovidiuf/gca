@@ -124,12 +124,41 @@ public class NewGenerationCollectionParser extends GCEventParserBase
                 tokens.add(null);
                 // then add duration
                 tokens.add(duration);
-
                 ngs = ngs.replaceFirst(",.*", "");
             }
-            else if (ngs.startsWith("DefNew: "))
+            else if (ngs.startsWith("DefNew"))
             {
-                ngs = ngs.substring("DefNew: ".length());
+                if (ngs.startsWith("DefNew: "))
+                {
+                    ngs = ngs.substring("DefNew: ".length());
+
+                    // introduce duration back into the token list so we can process it with the standard code
+                    String duration = ngs.substring(ngs.indexOf(',') + 1).trim();
+                    // fill for heap
+                    tokens.add(null);
+                    // then add duration
+                    tokens.add(duration);
+                    ngs = ngs.replaceFirst(",.*", "");
+                }
+                else if (ngs.startsWith("DefNew (promotion failed) : "))
+                {
+                    // record a new generation collection event that does not collect anything and mark it with
+                    // a "promotion failed" badge
+                    ngs = ngs.substring("DefNew (promotion failed) : ".length());
+                    notes = "promotion failed";
+                }
+                else
+                {
+                    throw new Exception("unknown new generation line: \"" + line + "\"");
+                }
+
+                // introduce duration back into the token list so we can process it with the standard code
+                String duration = ngs.substring(ngs.indexOf(',') + 1).trim();
+                // fill for heap
+                tokens.add(null);
+                // then add duration
+                tokens.add(duration);
+                ngs = ngs.replaceFirst(",.*", "");
             }
             else if (line.contains("YG occupancy"))
             {
@@ -177,9 +206,14 @@ public class NewGenerationCollectionParser extends GCEventParserBase
         }
         catch(Exception e)
         {
-            throw new ParserException(
-                    "invalid/unrecognized New Generation Collection line: \"" + line + "\"" +
-                            (e.getMessage() != null ? ", " + e.getMessage() : ""), e, lineNumber);
+//            throw new ParserException(
+//                    "invalid/unrecognized New Generation Collection line: \"" + line + "\"" +
+//                            (e.getMessage() != null ? ", " + e.getMessage() : ""), e, lineNumber);
+            log.warn(
+                "line " + lineNumber + ": invalid/unrecognized New Generation Collection line: \"" + line + "\"" +
+                    (e.getMessage() != null ? ", " + e.getMessage() : ""));
+
+            return null;
         }
     }
 

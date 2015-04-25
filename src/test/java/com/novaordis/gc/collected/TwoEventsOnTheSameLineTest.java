@@ -7,6 +7,7 @@ import com.novaordis.gc.model.event.NewGenerationCollection;
 import com.novaordis.gc.model.event.cms.CMSConcurrentMark;
 import com.novaordis.gc.model.event.cms.CMSConcurrentPreclean;
 import com.novaordis.gc.parser.GCLogParserFactory;
+import com.novaordis.gc.parser.TimeOrigin;
 import com.novaordis.gc.parser.linear.LinearScanParser;
 import org.junit.Assert;
 import org.junit.Test;
@@ -46,7 +47,7 @@ public class TwoEventsOnTheSameLineTest extends Assert
 
         LinearScanParser p = (LinearScanParser)GCLogParserFactory.getParser(isr);
 
-        List<GCEvent> events = p.parse(0L);
+        List<GCEvent> events = p.parse(new TimeOrigin(0L));
 
         // the important thing is the parser does not fail ...
 
@@ -89,7 +90,7 @@ public class TwoEventsOnTheSameLineTest extends Assert
 
         LinearScanParser p = (LinearScanParser)GCLogParserFactory.getParser(isr);
 
-        List<GCEvent> events = p.parse(0L);
+        List<GCEvent> events = p.parse(new TimeOrigin(0L));
 
         // the important thing is the parser does not fail ...
 

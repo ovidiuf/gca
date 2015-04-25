@@ -4,6 +4,7 @@ import com.novaordis.gc.model.CollectionType;
 import com.novaordis.gc.model.event.*;
 import com.novaordis.gc.parser.GCLogParser;
 import com.novaordis.gc.parser.GCLogParserFactory;
+import com.novaordis.gc.parser.TimeOrigin;
 import com.novaordis.gc.parser.linear.LinearScanParser;
 import com.novaordis.gc.parser.linear.ShutdownParser;
 import org.apache.log4j.Logger;
@@ -50,7 +51,7 @@ public class CollectedTest extends Assert
         GCLogParser p = GCLogParserFactory.getParser(isr);
         assertTrue(p instanceof LinearScanParser);
 
-        List<GCEvent> events = p.parse(0L);
+        List<GCEvent> events = p.parse(new TimeOrigin(0L));
 
         // the important thing is the parser does not fail ...
 
@@ -73,7 +74,7 @@ public class CollectedTest extends Assert
         GCLogParser p = GCLogParserFactory.getParser(isr);
         assertTrue(p instanceof LinearScanParser);
 
-        List<GCEvent> events = p.parse(1L);
+        List<GCEvent> events = p.parse(new TimeOrigin(1L));
 
         assertEquals(3, events.size());
 
@@ -110,7 +111,7 @@ public class CollectedTest extends Assert
         GCLogParser p = GCLogParserFactory.getParser(isr);
         assertTrue(p instanceof LinearScanParser);
 
-        Long timeOrigin = 1L;
+        TimeOrigin timeOrigin = new TimeOrigin(1L);
 
         List<GCEvent> events = p.parse(timeOrigin);
 
@@ -120,7 +121,7 @@ public class CollectedTest extends Assert
         assertEquals(CollectionType.NEW_GENERATION_COLLECTION, e.getCollectionType());
 
         assertEquals(53233950L, e.getOffset().longValue());
-        assertEquals(timeOrigin + 53233950L, e.getTime().longValue());
+        assertEquals(timeOrigin.get() + 53233950L, e.getTime().longValue());
     }
 
     @Test
@@ -134,7 +135,7 @@ public class CollectedTest extends Assert
         GCLogParser p = GCLogParserFactory.getParser(isr);
         assertTrue(p instanceof LinearScanParser);
 
-        Long timeOrigin = null;
+        TimeOrigin timeOrigin = new TimeOrigin();
 
         try
         {
@@ -151,8 +152,6 @@ public class CollectedTest extends Assert
     @Test
     public void cms_ng_rescan() throws Exception
     {
-        fail("RETURN HERE - FIGURE OUT HOW TO MIX DATESTAMP AND OFFSET TIMESTAMPS");
-
         InputStream is = CollectedTest.class.getClassLoader().getResourceAsStream("collected/cms-ng-rescan.log");
 
         assertNotNull(is);
@@ -161,16 +160,49 @@ public class CollectedTest extends Assert
         GCLogParser p = GCLogParserFactory.getParser(isr);
         assertTrue(p instanceof LinearScanParser);
 
-        List<GCEvent> events = p.parse(null);
+        TimeOrigin timeOrigin = new TimeOrigin();
+
+        List<GCEvent> events = p.parse(timeOrigin);
+
+        //
+        // we're skipping all the events on this line for the time being, we'll come back to it and we'll have to
+        // update the test
+        //
+
+        assertTrue(events.isEmpty());
     }
 
-    // Package protected -------------------------------------------------------------------------------------------------------------------
+    @Test
+    public void collected2() throws Exception
+    {
+        InputStream is = CollectedTest.class.getClassLoader().getResourceAsStream("collected/2.log");
 
-    // Protected ---------------------------------------------------------------------------------------------------------------------------
+        assertNotNull(is);
 
-    // Private -----------------------------------------------------------------------------------------------------------------------------
+        InputStreamReader isr = new InputStreamReader(is);
+        GCLogParser p = GCLogParserFactory.getParser(isr);
+        assertTrue(p instanceof LinearScanParser);
 
-    // Inner classes -----------------------------------------------------------------------------------------------------------------------
+        TimeOrigin timeOrigin = new TimeOrigin();
+
+        List<GCEvent> events = p.parse(timeOrigin);
+
+        //
+        // we're skipping all the events on this line for the time being, we'll come back to it and we'll have to
+        // update the test
+        //
+
+        assertTrue(events.isEmpty());
+    }
+
+
+    // Package protected -----------------------------------------------------------------------------------------------
+
+    // Protected -------------------------------------------------------------------------------------------------------
+
+    // Private ---------------------------------------------------------------------------------------------------------
+
+    // Inner classes ---------------------------------------------------------------------------------------------------
 }
 
 

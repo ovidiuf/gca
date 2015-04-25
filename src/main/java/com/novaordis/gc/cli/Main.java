@@ -5,6 +5,7 @@ import com.novaordis.gc.parser.GCLogParser;
 import com.novaordis.gc.parser.GCLogParserFactory;
 import com.novaordis.gc.model.event.GCEvent;
 import com.novaordis.gc.parser.ParserException;
+import com.novaordis.gc.parser.TimeOrigin;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -53,7 +54,8 @@ public class Main
             if (cmd.needsGcData())
             {
                 File gcLogFile = c.getGCLogFile();
-                Long timeOrigin = c.getTimeOrigin();
+
+                TimeOrigin timeOrigin = new TimeOrigin(c.getTimeOrigin());
 
                 GCLogParser gcParser = GCLogParserFactory.getParser(gcLogFile);
 

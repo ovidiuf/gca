@@ -3,6 +3,7 @@ package com.novaordis.gc.parser.linear;
 import com.novaordis.gc.model.CollectionType;
 import com.novaordis.gc.model.Timestamp;
 import com.novaordis.gc.model.event.*;
+import com.novaordis.gc.parser.TimeOrigin;
 import com.novaordis.utilities.Files;
 import com.novaordis.utilities.testing.Tests;
 import org.apache.log4j.Logger;
@@ -210,7 +211,7 @@ public class ShutdownParserTest extends Assert
         LinearScanParser p = new LinearScanParser(isr);
         p.installDefaultPipeline();
 
-        List<GCEvent> events = p.parse(1L);
+        List<GCEvent> events = p.parse(new TimeOrigin(1L));
 
         assertEquals(2, events.size());
 

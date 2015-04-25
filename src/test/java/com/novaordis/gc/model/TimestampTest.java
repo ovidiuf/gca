@@ -758,6 +758,34 @@ public class TimestampTest
         }
     }
 
+    // getTimeOrigin() -------------------------------------------------------------------------------------------------
+
+    @Test
+    public void getTimeOrigin() throws Exception
+    {
+        Timestamp ts = Timestamp.find("2015-01-01T01:01:01.000-0700: 1.000: ", 0, null);
+
+        long timeOrigin = ts.getTimeOrigin();
+
+        assertEquals(Timestamp.DATESTAMP_FORMAT.parse("2015-01-01T01:01:00.000-0700").getTime(), timeOrigin);
+    }
+
+    @Test
+    public void getTimeOrigin_NotEnoughInformation() throws Exception
+    {
+        Timestamp ts = Timestamp.find("2015-01-01T01:01:01.000-0700: ", 0, null);
+
+        assertNull(ts.getTimeOrigin());
+    }
+
+    @Test
+    public void getTimeOrigin_NotEnoughInformation2() throws Exception
+    {
+        Timestamp ts = Timestamp.find("1.000: ", 0, null);
+
+        assertNull(ts.getTimeOrigin());
+    }
+
     // getOffsetLiteral() ----------------------------------------------------------------------------------------------
 
     @Test
