@@ -273,8 +273,9 @@ public class LinearScanParser implements GCLogParser
 
     /**
      * Parse a line, which may contain multiple GC events.
-
+     *
      * @throws Exception
+     * @throws com.novaordis.gc.UserErrorException
      */
     private static void processLine(String line, long lineNumber, Long timeOrigin,
                                     List<GCEvent> events, GCEventParser processorPipeline) throws Exception
@@ -308,18 +309,12 @@ public class LinearScanParser implements GCLogParser
             }
             else
             {
-                // adjust time (if necessary)
-                ts.applyTimeOrigin(timeOrigin);
-
                 fragmentStart = ts.getEndPosition();
                 ts2 = Timestamp.find(line, ts.getEndPosition(), lineNumber);
             }
 
             if (ts2 != null)
             {
-                // adjust time (if necessary)
-                ts2.applyTimeOrigin(timeOrigin);
-
                 // multiple events on the same line
                 fragmentEnd = ts2.getStartPosition();
             }
@@ -330,6 +325,8 @@ public class LinearScanParser implements GCLogParser
             }
 
             String eventFragment = line.substring(fragmentStart, fragmentEnd);
+
+            adjustTimeOriginOnTimeStamps(timeOrigin, ts, ts2);
 
             parseEvent(ts, eventFragment, events, processorPipeline, lineNumber);
 
@@ -387,6 +384,34 @@ public class LinearScanParser implements GCLogParser
         // we reached the bottom of the GCEventParser pipeline,  we weren't able to find any event in the fragment,
         // we don't know how to parse this log entry, bail out
         log.warn("don't know to parse line " + lineNumber + ", fragment \"" + eventFragment + "\"");
+    }
+
+    /**
+     * We handle this in a separate method to be able to consistently catch NullPointerException in case we don't
+     * have a time origin and the time stamps need it - we need to turn this into an user error, which will bubble up
+     * all the way to CLI.
+     */
+    private static void adjustTimeOriginOnTimeStamps(Long timeOrigin, Timestamp ts, Timestamp ts2)
+        throws UserErrorException
+    {
+        try
+        {
+            if (ts != null)
+            {
+                // adjust time if necessary, otherwise it'll be a noop
+                ts.applyTimeOrigin(timeOrigin);
+            }
+
+            if (ts2 != null)
+            {
+                // adjust time if necessary, otherwise it'll be a noop
+                ts2.applyTimeOrigin(timeOrigin);
+            }
+        }
+        catch(NullPointerException e)
+        {
+            throw new UserErrorException("the garbage collection file needs a time origin, which is not specified anywhere. See the 'Time Origin' section of the documentation");
+        }
     }
 
     // Inner classes ---------------------------------------------------------------------------------------------------

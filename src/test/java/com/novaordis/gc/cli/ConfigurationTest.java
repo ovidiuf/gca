@@ -198,7 +198,7 @@ public class ConfigurationTest extends Assert
         assertTrue(c.getCommand() instanceof TestCommand);
     }
 
-    // inferred time origin ----------------------------------------------------------------------------------------------------------------
+    // inferred time origin --------------------------------------------------------------------------------------------
 
     @Test
     public void inferredTimeOrigin1() throws Exception
@@ -226,7 +226,8 @@ public class ConfigurationTest extends Assert
 
         Configuration c = new Configuration(args);
 
-        assertEquals(Configuration.COMMAND_LINE_TIME_ORIGIN_FORMAT.parse("12/28/11 08:08:55,000").getTime(), c.getTimeOrigin().longValue());
+        assertEquals(Configuration.COMMAND_LINE_TIME_ORIGIN_FORMAT.parse("12/28/11 08:08:55,000").getTime(),
+            c.getTimeOrigin().longValue());
     }
 
     @Test
@@ -259,7 +260,19 @@ public class ConfigurationTest extends Assert
         assertEquals("13-08-28 01-14-31 PM", s);
     }
 
-    // no time origin ----------------------------------------------------------------------------------------------------------------------
+    //
+    // gc.log.24Apr15130823
+    //
+
+    @Test
+    public void fileNameToTimeOrigin_ddmmmyyHHMMSS() throws Exception
+    {
+        Long time = Configuration.fileNameToTimeOrigin("gc.log.24Apr15130823");
+        String s = new SimpleDateFormat("yy-MM-dd hh-mm-ss a").format(time);
+        assertEquals("15-04-24 01-08-23 PM", s);
+    }
+
+    // no time origin --------------------------------------------------------------------------------------------------
 
     @Test
     public void noTimeOriginOnCommandLineOrFileName() throws Exception

@@ -101,14 +101,8 @@ public class NewGenerationCollectionParserTest extends Assert
         assertEquals(54, e.getDuration(), 0.0001);
     }
 
-    //
-    // CMS new generation collections
-    //
-    // [GC 1.985: [ParNew: 136320K->6357K(153344K), 0.0083580 secs] 136320K->6357K(4177280K), 0.0085020 secs] [Times: user=0.05 sys=0.01, real=0.01 secs]
-    //
-
     @Test
-    public void testCMS_EmbeddedOffsetPrecedesThanLineStartOffset() throws Exception
+    public void embeddedOffsetPrecedesThanLineStartOffset() throws Exception
     {
         String line = "[GC 1.985: [ParNew: 136320K->6357K(153344K), 0.0083580 secs] 136320K->6357K(4177280K), 0.0085020 secs] [Times: user=0.05 sys=0.01, real=0.01 secs]";
 
@@ -129,13 +123,13 @@ public class NewGenerationCollectionParserTest extends Assert
     }
 
     @Test
-    public void testCMS_EmbeddedOffsetBiggerThanLineStartOffset() throws Exception
+    public void embeddedOffsetBiggerThanLineStartOffset() throws Exception
     {
         String line = "[GC 1.986: [ParNew: 136320K->6357K(153344K), 0.0083580 secs] 136320K->6357K(4177280K), 0.0085020 secs] [Times: user=0.05 sys=0.01, real=0.01 secs]";
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
-        Timestamp ts = new Timestamp(1985L).applyTimeOrigin(0);
+        Timestamp ts = new Timestamp(1985L).applyTimeOrigin(0L);
 
         NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null);
 
@@ -156,13 +150,13 @@ public class NewGenerationCollectionParserTest extends Assert
     }
 
     @Test
-    public void testCMS() throws Exception
+    public void testParNew() throws Exception
     {
         String line = "[GC 1.985: [ParNew: 136320K->6357K(153344K), 0.0083580 secs] 136320K->6357K(4177280K), 0.0085020 secs] [Times: user=0.05 sys=0.01, real=0.01 secs]";
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
-        Timestamp ts = new Timestamp(1985L).applyTimeOrigin(0);
+        Timestamp ts = new Timestamp(1985L).applyTimeOrigin(0L);
 
         NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null);
 
@@ -183,13 +177,13 @@ public class NewGenerationCollectionParserTest extends Assert
     }
 
     @Test
-    public void testCMSWithPrintGCDateStamps() throws Exception
+    public void testParNewWithPrintGCDateStamps() throws Exception
     {
         String line = "[GC2014-08-14T08:38:27.033-0700: 53795.248: [ParNew: 451130K->52416K(471872K), 0.0293380 secs] 1011202K->614147K(4141888K) icms_dc=0 , 0.0294790 secs] [Times: user=0.14 sys=0.00, real=0.03 secs]";
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
-        Timestamp ts = new Timestamp(53795248L).applyTimeOrigin(0);
+        Timestamp ts = new Timestamp(53795248L).applyTimeOrigin(0L);
 
         NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null);
 
@@ -210,7 +204,7 @@ public class NewGenerationCollectionParserTest extends Assert
     }
 
     @Test
-    public void testCMS_PromotionFailed_degenerateCase() throws Exception
+    public void testPromotionFailed_degenerateCase() throws Exception
     {
         // we should never get in this situation, this is a remnant test from before splitting the
         // line by the timestamps
@@ -234,7 +228,7 @@ public class NewGenerationCollectionParserTest extends Assert
     }
 
     @Test
-    public void testCMS_GCAndCMSEventsOnTheSameLine_degenerateCase() throws Exception
+    public void testGCAndCMSEventsOnTheSameLine_degenerateCase() throws Exception
     {
         // we should never get in this situation, this is a remnant test from before splitting the
         // line by the timestamps
@@ -257,10 +251,6 @@ public class NewGenerationCollectionParserTest extends Assert
         }
     }
 
-    //
-    // [GC 53233.950: [ParNew: 4070928K->986133K(4373760K), 0.0997910 secs] 12266198K->9181403K(16039168K), 0.1002900 secs] [Times: user=0.76 sys=0.00, real=0.10 secs]
-    //
-
     @Test
     public void duplicateTimestamp_TimestampsMatch() throws Exception
     {
@@ -268,7 +258,7 @@ public class NewGenerationCollectionParserTest extends Assert
 
         NewGenerationCollectionParser p = new NewGenerationCollectionParser();
 
-        Timestamp ts = new Timestamp(53233950L).applyTimeOrigin(0);
+        Timestamp ts = new Timestamp(53233950L).applyTimeOrigin(0L);
 
         NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, -1, null);
 
@@ -307,6 +297,33 @@ public class NewGenerationCollectionParserTest extends Assert
             log.info(e.getMessage());
             assertEquals(77L, e.getLineNumber());
         }
+    }
+
+    @Test
+    public void testDefNew() throws Exception
+    {
+        String line = "[GC 4.993: [DefNew: 204800K->20403K(307200K), 0.0417850 secs] 204800K->20403K(1126400K), 0.0418540 secs] [Times: user=0.02 sys=0.02, real=0.04 secs]";
+
+        NewGenerationCollectionParser p = new NewGenerationCollectionParser();
+
+        Timestamp ts = new Timestamp(4993L);
+
+        NewGenerationCollection e = (NewGenerationCollection)p.parse(ts, line, 7L, null);
+
+        assertNotNull(e);
+
+        assertEquals(-1L, e.getTime().longValue());
+        assertEquals(4993L, e.getOffset().longValue());
+
+        assertEquals(204800L * 1024, e.get(FieldType.NG_BEFORE).getValue());
+        assertEquals(20403L * 1024, e.get(FieldType.NG_AFTER).getValue());
+        assertEquals(307200L * 1024, e.get(FieldType.NG_CAPACITY).getValue());
+
+        assertEquals(204800L * 1024, e.get(FieldType.HEAP_BEFORE).getValue());
+        assertEquals(20403L * 1024, e.get(FieldType.HEAP_AFTER).getValue());
+        assertEquals(1126400L * 1024, e.get(FieldType.HEAP_CAPACITY).getValue());
+
+        assertEquals(42, e.getDuration(), 0.01);
     }
 
     // Package protected -------------------------------------------------------------------------------------------------------------------

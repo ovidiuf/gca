@@ -26,7 +26,7 @@ public abstract class GCEventTest
     @Test
     public void testTimestampDuration() throws Exception
     {
-        Timestamp ts = new Timestamp(100110L).applyTimeOrigin(0);
+        Timestamp ts = new Timestamp(100110L).applyTimeOrigin(0L);
 
         GCEvent e = getGCEventToTest(ts, 7L);
 
@@ -40,7 +40,7 @@ public abstract class GCEventTest
 
         // duration (dedicated accessor and generic field)
         assertEquals(7L, e.getDuration());
-        assertEquals(7L, ((Long)e.get(FieldType.DURATION).getValue()).longValue());
+        assertEquals(7L, ((Long) e.get(FieldType.DURATION).getValue()).longValue());
     }
 
     // Package protected -------------------------------------------------------------------------------------------------------------------

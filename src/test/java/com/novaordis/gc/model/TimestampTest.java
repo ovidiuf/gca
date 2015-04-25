@@ -7,7 +7,6 @@ import org.junit.Test;
 import java.text.SimpleDateFormat;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -197,10 +196,10 @@ public class TimestampTest
     public void testEquals_SyntheticConstructor() throws Exception
     {
         Timestamp ts = new Timestamp(1001L);
-        ts.applyTimeOrigin(0);
+        ts.applyTimeOrigin(0L);
 
         Timestamp ts2 = new Timestamp(1001L);
-        ts2.applyTimeOrigin(0);
+        ts2.applyTimeOrigin(0L);
 
         assertEquals(ts, ts2);
         assertEquals(ts2, ts);
@@ -725,6 +724,38 @@ public class TimestampTest
         assertNull(ts.getOffset());
 
         assertTrue(ts == ts2);
+    }
+
+    @Test
+    public void applyTimeOrigin_TimeSet_NullOrigin() throws Exception
+    {
+        Timestamp ts = Timestamp.find("2015-01-01T01:01:01.001-0700: ", 0, -1L);
+
+        Long time = ts.getTime();
+        assertNotNull(time);
+
+        // this should be a noop
+        ts.applyTimeOrigin(null);
+
+        assertEquals(time, ts.getTime());
+    }
+
+    @Test
+    public void applyTimeOrigin_TimeNotSet_NullOrigin() throws Exception
+    {
+        Timestamp ts = new Timestamp(100L);
+
+        assertNull(ts.getTime());
+
+        try
+        {
+            ts.applyTimeOrigin(null);
+            fail("this should fail with NPE");
+        }
+        catch(NullPointerException e)
+        {
+            log.info(e.getMessage());
+        }
     }
 
     // getOffsetLiteral() ----------------------------------------------------------------------------------------------

@@ -53,7 +53,7 @@ public class FullCollectionParserTest extends Assert
 
         FullCollectionParser p = new FullCollectionParser();
 
-        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0);;
+        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0L);
 
         FullCollection e = (FullCollection)p.parse(ts, line, -1, null);
 
@@ -90,7 +90,7 @@ public class FullCollectionParserTest extends Assert
 
         FullCollectionParser p = new FullCollectionParser();
 
-        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0);;
+        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0L);
 
         FullCollection e = (FullCollection)p.parse(ts, line, -1, null);
 
@@ -129,7 +129,7 @@ public class FullCollectionParserTest extends Assert
 
         FullCollectionParser p = new FullCollectionParser();
 
-        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0);;
+        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0L);
 
         FullCollection e = (FullCollection)p.parse(ts, line, -1, null);
 
@@ -167,7 +167,7 @@ public class FullCollectionParserTest extends Assert
 
         FullCollectionParser p = new FullCollectionParser();
 
-        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0);;
+        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0L);
 
         FullCollection e = (FullCollection)p.parse(ts, line, -1, null);
 
@@ -210,7 +210,7 @@ public class FullCollectionParserTest extends Assert
 
         FullCollectionParser p = new FullCollectionParser();
 
-        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0);;
+        Timestamp ts = new Timestamp(1000L).applyTimeOrigin(0L);
 
         FullCollection e = (FullCollection)p.parse(ts, line, -1, null);
 

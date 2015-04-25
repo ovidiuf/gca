@@ -338,16 +338,26 @@ public class Timestamp
      *
      * In case the time is already set, the invocation is ignored. TODO: this is unusual, reconsider this
      *
+     * @param timeOrigin the time origin to apply to this time stamp. May be prepared to handle null. Depending
+     *        on the state of the timestamp, that may be OK or not. For example, if the timestamp has its time
+     *        set, the invocation is ignored. If the timestamp does not have the time set, and it gets null, it will
+     *        throw NullPointerException.
+     *
      * @return itself, to allow constructs like this:
      *
      * Timestamp ts = new Timestamp(...).applyTimeOrigin(...);
      *
+     * @exception java.lang.IllegalStateException if both the time and the offset are null - we cannot calculate the
+     *            time.
+     * @exception java.lang.NullPointerException if the time is not set, but we get a null time origin.
+     *
+     *
      */
-    public Timestamp applyTimeOrigin(long timeOrigin)
+    public Timestamp applyTimeOrigin(Long timeOrigin)
     {
         if (time != null)
         {
-            log.warn("applying time origin " + timeOrigin + " while the time is already set to " + time + ", IGNORED");
+            log.debug("applying time origin " + timeOrigin + " while the time is already set to " + time + ", ignored");
             return this;
         }
 

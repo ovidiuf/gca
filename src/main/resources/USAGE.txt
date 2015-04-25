@@ -89,6 +89,8 @@ The Time Origin
     *.29-Dec-11-220344        (time origin will be initialized to 12/29/11 10:03:44 PM)
     *.08-28-2013_13-14-31
     *.log-08-28-2013_13-14-31
+    *.24Apr15130823
+
 
         Example:
 

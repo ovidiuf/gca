@@ -9,7 +9,6 @@ import com.novaordis.gc.parser.GCEventParserBase;
 import com.novaordis.gc.parser.ParserException;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.util.List;
 
 /**
@@ -49,7 +48,7 @@ public class NewGenerationCollectionParser extends GCEventParserBase
      * Note that at the time of writing, I did not know what the difference between "GC" and "GC--" is, and I am
      * considering them equivalent.
      *
-     * @see com.novaordis.gc.parser.GCEventParser#parse(com.novaordis.gc.model.Timestamp, String, long, GCEvent, File)
+     * @see com.novaordis.gc.parser.GCEventParser#parse(com.novaordis.gc.model.Timestamp, String, long, GCEvent)
      */
     @Override
     public GCEvent parse(Timestamp ts, String line, long lineNumber, GCEvent current) throws ParserException
@@ -105,7 +104,6 @@ public class NewGenerationCollectionParser extends GCEventParserBase
             {
                 if (ngs.startsWith("ParNew: "))
                 {
-                    // CMS
                     ngs = ngs.substring("ParNew: ".length());
                 }
                 else if (ngs.startsWith("ParNew (promotion failed): "))
@@ -117,7 +115,7 @@ public class NewGenerationCollectionParser extends GCEventParserBase
                 }
                 else
                 {
-                    throw new Exception("unknown CMS new generation line: \"" + line + "\"");
+                    throw new Exception("unknown new generation line: \"" + line + "\"");
                 }
 
                 // introduce duration back into the token list so we can process it with the standard code
@@ -128,6 +126,10 @@ public class NewGenerationCollectionParser extends GCEventParserBase
                 tokens.add(duration);
 
                 ngs = ngs.replaceFirst(",.*", "");
+            }
+            else if (ngs.startsWith("DefNew: "))
+            {
+                ngs = ngs.substring("DefNew: ".length());
             }
             else if (line.contains("YG occupancy"))
             {
