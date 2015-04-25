@@ -749,32 +749,6 @@ public class TimestampTest
         assertEquals("1.001", ts.getOffsetLiteral());
     }
 
-    // Timestamp.isTimestamp() protected -------------------------------------------------------------------------------
-
-    @Test
-    public void isTimestamp_null() throws Exception
-    {
-        assertFalse(Timestamp.isTimestamp(null));
-    }
-
-    @Test
-    public void isTimestamp_Offset() throws Exception
-    {
-        assertTrue(Timestamp.isTimestamp("1.001"));
-    }
-
-    @Test
-    public void isTimestamp_EXPLICIT_TIMESTAMP_FORMAT() throws Exception
-    {
-        assertTrue(Timestamp.isTimestamp("2014-08-14T01:12:28.621-0700"));
-    }
-
-    @Test
-    public void isTimestamp_SomethingElse() throws Exception
-    {
-        assertFalse(Timestamp.isTimestamp("CMS"));
-    }
-
     // Package protected -----------------------------------------------------------------------------------------------
 
     // Protected -------------------------------------------------------------------------------------------------------

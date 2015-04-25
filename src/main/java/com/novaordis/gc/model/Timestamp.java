@@ -27,16 +27,6 @@ public class Timestamp
 
     private static final Logger log = Logger.getLogger(Timestamp.class);
 
-
-    public static final SimpleDateFormat EXPLICIT_TIMESTAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZZZ");
-
-
-
-
-
-
-
-
     public static final String DATESTAMP_FORMAT_LITERAL = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZZ";
     public static final SimpleDateFormat DATESTAMP_FORMAT = new SimpleDateFormat(DATESTAMP_FORMAT_LITERAL);
 
@@ -52,27 +42,6 @@ public class Timestamp
         { COMBINED_PATTERN, OFFSET_PATTERN,  DATESTAMP_PATTERN };
 
     // Static ----------------------------------------------------------------------------------------------------------
-
-    /**
-     * Returns true is the string is either an offset ("53233.950") or an explicit timestamp format.
-     */
-    public static boolean isTimestamp(String s)
-    {
-        if (s == null)
-        {
-            return false;
-        }
-
-        try
-        {
-            return OFFSET_FORMAT.parse(s) != null || EXPLICIT_TIMESTAMP_FORMAT.parse(s) != null;
-        }
-        catch(Exception e)
-        {
-            return false;
-        }
-
-    }
 
     public static String longToOffsetLiteral(long offset)
     {
@@ -238,8 +207,6 @@ public class Timestamp
     private String literal;
     private String dateStampLiteral;
     private String offsetLiteral;
-    private long explicitTimestampTime;
-    private String explicitTimestampLiteral;
 
     // the location in the original string where the time stamp started
     private int startPosition;
@@ -265,7 +232,7 @@ public class Timestamp
     public Timestamp(long offset)
     {
         this.offset = offset;
-        this.offsetLiteral = Timestamp.longToOffsetLiteral(offset);
+        this.offsetLiteral = longToOffsetLiteral(offset);
         this.literal = offsetLiteral;
     }
 
@@ -396,28 +363,8 @@ public class Timestamp
     @Override
     public String toString()
     {
-        return explicitTimestampLiteral != null ? explicitTimestampLiteral : literal;
+        return literal;
     }
-
-
-    /**
-     * Returns the explicit timestamp literal, as recorded in the original GC log file, if the explicit timestamp is
-     * present, or null otherwise.
-     */
-    public String getExplicitTimestampLiteral()
-    {
-        return explicitTimestampLiteral;
-    }
-
-    /**
-     * @return a positive value if the explicit timestamp has been found in the file and it has a valid value,
-     * -1 otherwise.
-     */
-    public long getExplicitTimestampTime()
-    {
-        return explicitTimestampTime;
-    }
-
 
     @Override
     public boolean equals(Object o)
