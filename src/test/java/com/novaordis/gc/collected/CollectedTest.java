@@ -2,6 +2,8 @@ package com.novaordis.gc.collected;
 
 import com.novaordis.gc.model.CollectionType;
 import com.novaordis.gc.model.event.*;
+import com.novaordis.gc.parser.GCLogParser;
+import com.novaordis.gc.parser.GCLogParserFactory;
 import com.novaordis.gc.parser.linear.LinearScanParser;
 import com.novaordis.gc.parser.linear.ShutdownParser;
 import org.apache.log4j.Logger;
@@ -41,12 +43,12 @@ public class CollectedTest extends Assert
     public void lastLineIncomplete() throws Exception
     {
         InputStream is = CollectedTest.class.getClassLoader().getResourceAsStream("collected/incomplete-last-line.log");
+
         assertNotNull(is);
 
         InputStreamReader isr = new InputStreamReader(is);
-
-        LinearScanParser p = new LinearScanParser(isr);
-        p.installDefaultPipeline();
+        GCLogParser p = GCLogParserFactory.getParser(isr);
+        assertTrue(p instanceof LinearScanParser);
 
         List<GCEvent> events = p.parse(0L);
 
@@ -64,12 +66,12 @@ public class CollectedTest extends Assert
     public void logUpdatedOnShutdown() throws Exception
     {
         InputStream is = CollectedTest.class.getClassLoader().getResourceAsStream("collected/log-updated-on-shutdown.log");
+
         assertNotNull(is);
 
         InputStreamReader isr = new InputStreamReader(is);
-
-        LinearScanParser p = new LinearScanParser(isr);
-        p.installDefaultPipeline();
+        GCLogParser p = GCLogParserFactory.getParser(isr);
+        assertTrue(p instanceof LinearScanParser);
 
         List<GCEvent> events = p.parse(1L);
 
@@ -101,12 +103,12 @@ public class CollectedTest extends Assert
     public void doubleTimeStampOnMinorCollection_WithTimeOrigin() throws Exception
     {
         InputStream is = CollectedTest.class.getClassLoader().getResourceAsStream("collected/double-time-stamp-on-minor-collection.log");
+
         assertNotNull(is);
 
         InputStreamReader isr = new InputStreamReader(is);
-
-        LinearScanParser p = new LinearScanParser(isr);
-        p.installDefaultPipeline();
+        GCLogParser p = GCLogParserFactory.getParser(isr);
+        assertTrue(p instanceof LinearScanParser);
 
         Long timeOrigin = 1L;
 
@@ -125,12 +127,12 @@ public class CollectedTest extends Assert
     public void doubleTimeStampOnMinorCollection_WithNoTimeOrigin() throws Exception
     {
         InputStream is = CollectedTest.class.getClassLoader().getResourceAsStream("collected/double-time-stamp-on-minor-collection.log");
+
         assertNotNull(is);
 
         InputStreamReader isr = new InputStreamReader(is);
-
-        LinearScanParser p = new LinearScanParser(isr);
-        p.installDefaultPipeline();
+        GCLogParser p = GCLogParserFactory.getParser(isr);
+        assertTrue(p instanceof LinearScanParser);
 
         Long timeOrigin = null;
 
@@ -144,6 +146,22 @@ public class CollectedTest extends Assert
         {
             log.info(e.getMessage());
         }
+    }
+
+    @Test
+    public void cms_ng_rescan() throws Exception
+    {
+        fail("RETURN HERE - FIGURE OUT HOW TO MIX DATESTAMP AND OFFSET TIMESTAMPS");
+
+        InputStream is = CollectedTest.class.getClassLoader().getResourceAsStream("collected/cms-ng-rescan.log");
+
+        assertNotNull(is);
+
+        InputStreamReader isr = new InputStreamReader(is);
+        GCLogParser p = GCLogParserFactory.getParser(isr);
+        assertTrue(p instanceof LinearScanParser);
+
+        List<GCEvent> events = p.parse(null);
     }
 
     // Package protected -------------------------------------------------------------------------------------------------------------------

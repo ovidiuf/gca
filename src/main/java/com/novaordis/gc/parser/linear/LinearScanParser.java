@@ -326,7 +326,7 @@ public class LinearScanParser implements GCLogParser
 
             String eventFragment = line.substring(fragmentStart, fragmentEnd);
 
-            adjustTimeOriginOnTimeStamps(timeOrigin, ts, ts2);
+            adjustTimeOriginOnTimeStamps(timeOrigin, ts, ts2, lineNumber);
 
             parseEvent(ts, eventFragment, events, processorPipeline, lineNumber);
 
@@ -391,7 +391,7 @@ public class LinearScanParser implements GCLogParser
      * have a time origin and the time stamps need it - we need to turn this into an user error, which will bubble up
      * all the way to CLI.
      */
-    private static void adjustTimeOriginOnTimeStamps(Long timeOrigin, Timestamp ts, Timestamp ts2)
+    private static void adjustTimeOriginOnTimeStamps(Long timeOrigin, Timestamp ts, Timestamp ts2, long lineNumber)
         throws UserErrorException
     {
         try
@@ -410,7 +410,7 @@ public class LinearScanParser implements GCLogParser
         }
         catch(NullPointerException e)
         {
-            throw new UserErrorException("the garbage collection file needs a time origin, which is not specified anywhere. See the 'Time Origin' section of the documentation");
+            throw new UserErrorException("the GC event specified on line " + lineNumber + " needs a time origin, which is not specified. See the 'Time Origin' section of the documentation");
         }
     }
 
