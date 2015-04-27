@@ -1,25 +1,42 @@
 
 Usage:
 
-    gc-analyzer [-t|--time-origin MM/dd/yy HH:mm:ss,SSS] [global-options] <gc-log-file> [command] [command-arguments]
+    gca [-t|--time-origin MM/dd/yy HH:mm:ss,SSS] [global-options] <gc-log-file> [command] [command-arguments]
 
 Commands:
 
  info - displays a summary of the garbage collection log (this is the default command, and will be implicitly executed
         if a GC log file is specified, and there is no other command to override it).
 
- version - displays gc-analyzer version and exits.
+ version - displays gca version and exits.
+
+ toms/tots - converts timestamps specified in the given format to UTC milliseconds and back (toms is the abbreviation of
+        "to milliseconds" and tots is the abbreviation of "to timestamp"). toms/tots do not need a gc collection file
+        to run.
+
+        Usage:
+
+            gca toms "<formatted-timestamp>" "<input-timestamp-format>"
+            gca tots <ms-value> "<output-timestamp-format>"
+
+        Example:
+
+                gca toms "Apr 16 2015 20:12:03+0000" "MMM dd yyyy HH:mm:ssZ"
+                gca tots 1429215123000  "MMM dd yyyy HH:mm:ssZ"
+
 
  export - exports selected data into a comma separated values file. If no output file is specified. the data will be
         written at stdout. For each selected entry, the CSV line will start with a millisecond precision timestamp and
         it will contain a configurable set of fields.
 
-        gc-analyzer [...] <gc-log-file>
-            export \
-            [-o|--output <output-file>] \
-            [-u|--unit <K, M, G>]
-            [-c|--collection-type <all|full, ng, cms-initial-mark, cms-concurrent-mark-start ...>] \
-            [-f|--fields <comma-separated-field-and-expression-list>] \
+        Usage:
+
+            gca [...] <gc-log-file>
+                export \
+                [-o|--output <output-file>] \
+                [-u|--unit <K, M, G>]
+                [-c|--collection-type <all|full, ng, cms-initial-mark, cms-concurrent-mark-start ...>] \
+                [-f|--fields <comma-separated-field-and-expression-list>] \
 
         The unit is by default M (megabytes) and it can be changed to b (bytes), K (kilobytes) or G (gigabytes).
 
@@ -73,11 +90,11 @@ Commands:
 
         Example:
 
-                gc-analyzer ./gc.29-Dec-11-0808 export
+                gca ./gc.29-Dec-11-0808 export
 
-                gc-analyzer ./gc.29-Dec-11-0808 export --output /tmp/test.csv
+                gca ./gc.29-Dec-11-0808 export --output /tmp/test.csv
 
-                gc-analyzer ./gc.29-Dec-11-0808 export -c full -f offset, type, duration, og-capacity, og-after, og-after/og-capacity*100
+                gca ./gc.29-Dec-11-0808 export -c full -f offset, type, duration, og-capacity, og-after, og-after/og-capacity*100
 
 
 The Time Origin
@@ -95,7 +112,7 @@ The Time Origin
 
         Example:
 
-                gc-analyzer -t 12/29/11 10:04:44,000 ./gc.log info
+                gca -t 12/29/11 10:04:44,000 ./gc.log info
 
     For more details, see the "Time Origin" section of the User Manual.
 

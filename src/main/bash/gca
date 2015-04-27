@@ -48,6 +48,7 @@ DEBUG_OPTS_SHMEM="-Xrunjdwp:transport=dt_shmem,server=y,suspend=y,address=run"
 
 while [ "$1" != "" ]; do
     if [ "$1" = "--debug" ]; then
+        debug=true
         if [ "${os}" = "windows" ]; then
             JAVA_OPTS="${JAVA_OPTS} ${DEBUG_OPTS_SHMEM}"
         else
@@ -56,6 +57,9 @@ while [ "$1" != "" ]; do
     elif [ "$1" = "--profile" ]; then
         PROFILING_OPTS="-agentlib:yjpagent"
         JAVA_OPTS="${JAVA_OPTS} ${PROFILING_OPTS}"
+    elif [ "$1" != "${1/ /}" ]; then
+        # the argumment contains spaces, preserve quotes around arguments
+        ARGS="${ARGS} \"$1\""
     else
         ARGS="${ARGS} $1"
     fi

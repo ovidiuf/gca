@@ -3,7 +3,10 @@ package com.novaordis.gc.cli;
 import com.novaordis.gc.cli.command.ExportCommand;
 import com.novaordis.gc.cli.command.InfoCommand;
 import com.novaordis.gc.cli.command.TestCommand;
+import com.novaordis.gc.cli.command.tccs.TimestampConversionCommand;
 import com.novaordis.gc.cli.command.VersionCommand;
+import com.novaordis.gc.cli.command.tccs.TomsCommand;
+import com.novaordis.gc.cli.command.tccs.TotsCommand;
 
 import java.util.Iterator;
 
@@ -39,6 +42,17 @@ public class CommandFactory
         else if ("export".equals(name))
         {
             return new ExportCommand(c, args);
+        }
+        else if ("toms".equals(name) || "tots".equals(name))
+        {
+            if (name.equals("toms"))
+            {
+                return new TomsCommand(c, args);
+            }
+            else
+            {
+                return new TotsCommand(c, args);
+            }
         }
 
         return null;
