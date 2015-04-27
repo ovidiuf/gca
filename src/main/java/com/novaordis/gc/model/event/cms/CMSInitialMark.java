@@ -26,6 +26,7 @@ public class CMSInitialMark extends CMSEvent
     public CMSInitialMark(Timestamp ts, long duration, CurrentMax og, CurrentMax heap)
     {
         super(ts, duration);
+        setCollectionType(CollectionType.CMS_INITIAL_MARK);
         setField(FieldType.OG, new Field(FieldType.OG, Util.convertToBytes(og.getUnit(), og.getCurrent())));
         setField(FieldType.OG_CAPACITY, new Field(FieldType.OG_CAPACITY, Util.convertToBytes(og.getUnit(), og.getMax())));
         setField(FieldType.HEAP, new Field(FieldType.HEAP, Util.convertToBytes(og.getUnit(), heap.getCurrent())));
