@@ -5,14 +5,14 @@ Usage:
 
 Commands:
 
- info - displays a summary of the garbage collection log (this is the default command, and will be implicitly executed if a
-        GC log file is specified, and there is no other command to override it).
+ info - displays a summary of the garbage collection log (this is the default command, and will be implicitly executed
+        if a GC log file is specified, and there is no other command to override it).
 
  version - displays gc-analyzer version and exits.
 
- export - exports selected data into a comma separated values file. If no output file is specified. the data will be written at stdout.
-        For each selected entry, the CSV line will start with a millisecond precision timestamp and it will contain a configurable set of
-        fields.
+ export - exports selected data into a comma separated values file. If no output file is specified. the data will be
+        written at stdout. For each selected entry, the CSV line will start with a millisecond precision timestamp and
+        it will contain a configurable set of fields.
 
         gc-analyzer [...] <gc-log-file>
             export \
@@ -23,13 +23,14 @@ Commands:
 
         The unit is by default M (megabytes) and it can be changed to b (bytes), K (kilobytes) or G (gigabytes).
 
-        The types of the events to be exported can be specified with -c (or --collection-type) as a comma separated list of labels,
-        including "full", "ng". If not specified, the default behavior is to export only the "full" collection event data. If all events
-        are to be exported, use "all".
+        The types of the events to be exported can be specified with -c (or --collection-type) as a comma separated list
+        of labels, including "full", "ng". If not specified, the default behavior is to export *all* collection event
+        data. This is equivalent with specifying '-c all'.
 
-        All original data from the GC file can be exported by specifying a combination of the following fields. Also, expressions involving
-        the following fields are allowed. Timestamp will be always included and will be the first field of the line. The order in which the
-        fields (or the expressions involving fields) are specified will be maintained:
+        All original data from the GC file can be exported by specifying a combination of the following fields. Also,
+        expressions involving the following fields are allowed. Timestamp will be always included and will be the first
+        field of the line. The order in which the fields (or the expressions involving fields) are specified will be
+        maintained:
 
             offset
 

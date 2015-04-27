@@ -41,17 +41,17 @@ import java.util.Set;
  */
 public class ExportCommandTest extends Assert
 {
-    // Constants ---------------------------------------------------------------------------------------------------------------------------
+    // Constants -------------------------------------------------------------------------------------------------------
 
     private static final Logger log = Logger.getLogger(ExportCommandTest.class);
 
-    // Static ------------------------------------------------------------------------------------------------------------------------------
+    // Static ----------------------------------------------------------------------------------------------------------
 
-    // Attributes --------------------------------------------------------------------------------------------------------------------------
+    // Attributes ------------------------------------------------------------------------------------------------------
 
-    // Constructors ------------------------------------------------------------------------------------------------------------------------
+    // Constructors ----------------------------------------------------------------------------------------------------
 
-    // Public ------------------------------------------------------------------------------------------------------------------------------
+    // Public ----------------------------------------------------------------------------------------------------------
 
     @After
     public void scratchCleanup() throws Exception
@@ -66,10 +66,10 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export"
-                };
+            {
+                f.getAbsolutePath(),
+                "export"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -80,9 +80,7 @@ public class ExportCommandTest extends Assert
 
         assertEquals(Unit.M, ec.getOutputMemoryUnit());
 
-        Set<CollectionType> ct = ec.getCollectionTypes();
-        assertEquals(1, ct.size());
-        assertTrue(ct.contains(CollectionType.FULL_COLLECTION));
+        testDefaultCollectionTypes(ec.getCollectionTypes());
 
         List<Expression> expressions = ec.getExpressions();
 
@@ -102,12 +100,12 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "--output",
-                        "./test.csv"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "--output",
+                "./test.csv"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -124,12 +122,12 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "-o",
-                        "./test.csv"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "-o",
+                "./test.csv"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -146,11 +144,11 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "--output"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "--output"
+            };
 
         try
         {
@@ -170,12 +168,12 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "--output",
-                        "--unit"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "--output",
+                "--unit"
+            };
 
         try
         {
@@ -188,6 +186,8 @@ public class ExportCommandTest extends Assert
         }
     }
 
+    // constructor unit configuration ----------------------------------------------------------------------------------
+
     @Test
     public void constructor_Unit() throws Exception
     {
@@ -195,12 +195,12 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "--unit",
-                        "kb"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "--unit",
+                "kb"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -216,12 +216,12 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "-u",
-                        "KB"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "-u",
+                "KB"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -237,11 +237,11 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "--unit"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "--unit"
+            };
 
         try
         {
@@ -261,12 +261,12 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "--unit",
-                        "--output"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "--unit",
+                "--output"
+            };
 
         try
         {
@@ -279,17 +279,17 @@ public class ExportCommandTest extends Assert
         }
     }
 
-    // collection-type specification -------------------------------------------------------------------------------------------------------
+    // constructor collection-type specification -----------------------------------------------------------------------
 
     @Test
-    public void testConstructor_NoArgumentFollowingCollectionType_LongSwitch() throws Exception
+    public void constructor_NoArgumentFollowingCollectionType_LongSwitch() throws Exception
     {
         String[] args = new String[]
-                {
-                        "/does/not/matter",
-                        "export",
-                        "--collection-type"
-                };
+            {
+                "/does/not/matter",
+                "export",
+                "--collection-type"
+            };
 
         try
         {
@@ -303,14 +303,14 @@ public class ExportCommandTest extends Assert
     }
 
     @Test
-    public void testConstructor_NoArgumentFollowingCollectionType_ShortSwitch() throws Exception
+    public void constructor_NoArgumentFollowingCollectionType_ShortSwitch() throws Exception
     {
         String[] args = new String[]
-                {
-                        "/does/not/matter",
-                        "export",
-                        "-c"
-                };
+            {
+                "/does/not/matter",
+                "export",
+                "-c"
+            };
 
         try
         {
@@ -324,18 +324,39 @@ public class ExportCommandTest extends Assert
     }
 
     @Test
-    public void testConstructor_Full() throws Exception
+    public void constructor_CollectionTypeDefault() throws Exception
     {
         File f = new File(Tests.getScratchDirectory(), "/tmp/gc.12-Jan-11-0000");
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "--collection-type",
-                        "full"
-                };
+            {
+                f.getAbsolutePath(),
+                "export"
+            };
+
+        Configuration c = new Configuration(args);
+
+        Set<CollectionType> cts = ((ExportCommand)c.getCommand()).getCollectionTypes();
+
+        // make sure that all known collection types are in here
+
+        testDefaultCollectionTypes(cts);
+    }
+
+    @Test
+    public void constructor_Full() throws Exception
+    {
+        File f = new File(Tests.getScratchDirectory(), "/tmp/gc.12-Jan-11-0000");
+        Files.write(f, "some data");
+
+        String[] args = new String[]
+            {
+                f.getAbsolutePath(),
+                "export",
+                "--collection-type",
+                "full"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -345,18 +366,18 @@ public class ExportCommandTest extends Assert
     }
 
     @Test
-    public void testConstructor_Ng() throws Exception
+    public void constructor_Ng() throws Exception
     {
         File f = new File(Tests.getScratchDirectory(), "/tmp/gc.12-Jan-11-0000");
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "--collection-type",
-                        "ng"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "--collection-type",
+                "ng"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -366,19 +387,19 @@ public class ExportCommandTest extends Assert
     }
 
     @Test
-    public void testConstructor_Full_Comma_Ng() throws Exception
+    public void constructor_Full_Comma_Ng() throws Exception
     {
         File f = new File(Tests.getScratchDirectory(), "/tmp/gc.12-Jan-11-0000");
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "--collection-type",
-                        "full,",
-                        "ng"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "--collection-type",
+                "full,",
+                "ng"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -389,20 +410,20 @@ public class ExportCommandTest extends Assert
     }
 
     @Test
-    public void testConstructor_Full_Space_Comma_Ng() throws Exception
+    public void constructor_Full_Space_Comma_Ng() throws Exception
     {
         File f = new File(Tests.getScratchDirectory(), "/tmp/gc.12-Jan-11-0000");
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "--collection-type",
-                        "full",
-                        ",",
-                        "ng"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "--collection-type",
+                "full",
+                ",",
+                "ng"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -413,21 +434,21 @@ public class ExportCommandTest extends Assert
     }
 
     @Test
-    public void testConstructor_Duplicates() throws Exception
+    public void constructor_Duplicates() throws Exception
     {
         File f = new File(Tests.getScratchDirectory(), "/tmp/gc.12-Jan-11-0000");
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "--collection-type",
-                        "full,",
-                        "ng,",
-                        "full,",
-                        "ng,"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "--collection-type",
+                "full,",
+                "ng,",
+                "full,",
+                "ng,"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -438,18 +459,18 @@ public class ExportCommandTest extends Assert
     }
 
     @Test
-    public void testConstructor_All() throws Exception
+    public void constructor_All() throws Exception
     {
         File f = new File(Tests.getScratchDirectory(), "/tmp/gc.12-Jan-11-0000");
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "--collection-type",
-                        "all"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "--collection-type",
+                "all"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -464,22 +485,22 @@ public class ExportCommandTest extends Assert
     }
 
     @Test
-    public void testConstructor_All_And_Duplicates() throws Exception
+    public void constructor_All_And_Duplicates() throws Exception
     {
         File f = new File(Tests.getScratchDirectory(), "/tmp/gc.12-Jan-11-0000");
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "--collection-type",
-                        "full,",
-                        "all,",
-                        "ng,",
-                        "full,",
-                        "ng,"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "--collection-type",
+                "full,",
+                "all,",
+                "ng,",
+                "full,",
+                "ng,"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -494,18 +515,18 @@ public class ExportCommandTest extends Assert
     }
 
     @Test
-    public void testConstructor_NonCollectionTypeAfterCollectionTypeSwitch_LongSwitch() throws Exception
+    public void constructor_NonCollectionTypeAfterCollectionTypeSwitch_LongSwitch() throws Exception
     {
         File f = new File(Tests.getScratchDirectory(), "/tmp/gc.12-Jan-11-0000");
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "--collection-type",
-                        "something"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "--collection-type",
+                "something"
+            };
 
         try
         {
@@ -519,18 +540,18 @@ public class ExportCommandTest extends Assert
     }
 
     @Test
-    public void testConstructor_NonCollectionTypeAfterCollectionTypeSwitch_ShortSwitch() throws Exception
+    public void constructor_NonCollectionTypeAfterCollectionTypeSwitch_ShortSwitch() throws Exception
     {
         File f = new File(Tests.getScratchDirectory(), "/tmp/gc.12-Jan-11-0000");
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "-c",
-                        "something"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "-c",
+                "something"
+            };
 
         try
         {
@@ -543,17 +564,17 @@ public class ExportCommandTest extends Assert
         }
     }
 
-    // fields specification ----------------------------------------------------------------------------------------------------------------
+    // fields specification --------------------------------------------------------------------------------------------
 
     @Test
     public void testConstructor_NoArgumentFollowingFields_LongSwitch() throws Exception
     {
         String[] args = new String[]
-                {
-                        "/does/not/matter",
-                        "export",
-                        "--fields"
-                };
+            {
+                "/does/not/matter",
+                "export",
+                "--fields"
+            };
 
         try
         {
@@ -570,11 +591,11 @@ public class ExportCommandTest extends Assert
     public void testConstructor_NoArgumentFollowingFields_ShortSwitch() throws Exception
     {
         String[] args = new String[]
-                {
-                        "/does/not/matter",
-                        "export",
-                        "-f"
-                };
+            {
+                "/does/not/matter",
+                "export",
+                "-f"
+            };
 
         try
         {
@@ -594,13 +615,13 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "--fields",
-                        "pg-before,",
-                        "pg-capacity"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "--fields",
+                "pg-before,",
+                "pg-capacity"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -617,13 +638,13 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "-f",
-                        "collection-type,",
-                        "duration"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "-f",
+                "collection-type,",
+                "duration"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -640,12 +661,12 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "--fields",
-                        "something"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "--fields",
+                "something"
+            };
 
         try
         {
@@ -665,12 +686,12 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "-f",
-                        "something"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "-f",
+                "something"
+            };
 
         try
         {
@@ -690,12 +711,12 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "-f",
-                        "ng-before,og-before"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "-f",
+                "ng-before,og-before"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -712,12 +733,12 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "-f",
-                        "ng-before,og-before,pg-before"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "-f",
+                "ng-before,og-before,pg-before"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -735,14 +756,14 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "-f",
-                        "ng-after",
-                        "ng-before,og-before,pg-before",
-                        "pg-after"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "-f",
+                "ng-after",
+                "ng-before,og-before,pg-before",
+                "pg-after"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -762,14 +783,14 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "-f",
-                        "ng-after",
-                        ",ng-before,",
-                        "pg-after"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "-f",
+                "ng-after",
+                ",ng-before,",
+                "pg-after"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -787,12 +808,12 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "-f",
-                        ",,,ng-after",
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "-f",
+                ",,,ng-after",
+            };
 
         Configuration c = new Configuration(args);
 
@@ -808,12 +829,12 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "-f",
-                        "ng-after,,,",
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "-f",
+                "ng-after,,,",
+            };
 
         Configuration c = new Configuration(args);
 
@@ -829,12 +850,12 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "-f",
-                        ",,,",
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "-f",
+                ",,,",
+            };
 
         try
         {
@@ -854,14 +875,14 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "-f",
-                        "ng-after,ng-before,ng-capacity,",
-                        "og-after,og-before,og-capacity",
-                        "pg-after"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "-f",
+                "ng-after,ng-before,ng-capacity,",
+                "og-after,og-before,og-capacity",
+                "pg-after"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -883,15 +904,15 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "-f",
-                        "ng-after,ng-before,ng-capacity,",
-                        "pg-before",
-                        "og-after,og-before,og-capacity",
-                        "pg-after"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "-f",
+                "ng-after,ng-before,ng-capacity,",
+                "pg-before",
+                "og-after,og-before,og-capacity",
+                "pg-after"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -914,14 +935,14 @@ public class ExportCommandTest extends Assert
         Files.write(f, "some data");
 
         String[] args = new String[]
-                {
-                        f.getAbsolutePath(),
-                        "export",
-                        "-f",
-                        "heap-before",
-                        "heap-after",
-                        "heap-capacity"
-                };
+            {
+                f.getAbsolutePath(),
+                "export",
+                "-f",
+                "heap-before",
+                "heap-after",
+                "heap-capacity"
+            };
 
         Configuration c = new Configuration(args);
 
@@ -932,7 +953,7 @@ public class ExportCommandTest extends Assert
         assertEquals(FieldType.HEAP_CAPACITY, exp.get(2));
     }
 
-    // toSeries() tests --------------------------------------------------------------------------------------------------------------------
+    // toSeries() tests ------------------------------------------------------------------------------------------------
 
     @Test
     public void toSeries_OffsetOnly() throws Exception
@@ -948,9 +969,9 @@ public class ExportCommandTest extends Assert
 
         List<GCEvent> events = new ArrayList<GCEvent>();
         events.add(new FullCollection(
-                new Timestamp(101101L).applyTimeOrigin(0L), 1001L,
-                new BeforeAfterMax(-1L, -1L, -1L, Unit.b), new BeforeAfterMax(-1L, -1L, -1L, Unit.b),
-                new BeforeAfterMax(-1L, -1L, -1L, Unit.b), new BeforeAfterMax(-1L, -1L, -1L, Unit.b), false));
+            new Timestamp(101101L).applyTimeOrigin(0L), 1001L,
+            new BeforeAfterMax(-1L, -1L, -1L, Unit.b), new BeforeAfterMax(-1L, -1L, -1L, Unit.b),
+            new BeforeAfterMax(-1L, -1L, -1L, Unit.b), new BeforeAfterMax(-1L, -1L, -1L, Unit.b), false));
 
         Series s = ec.toSeries(events);
 
@@ -986,10 +1007,10 @@ public class ExportCommandTest extends Assert
 
         List<Expression> toBeExported = Arrays.asList((Expression)
                 FieldType.OFFSET,
-                FieldType.COLLECTION_TYPE,
-                FieldType.DURATION,
-                FieldType.OG_AFTER,
-                FieldType.NG_AFTER);
+            FieldType.COLLECTION_TYPE,
+            FieldType.DURATION,
+            FieldType.OG_AFTER,
+            FieldType.NG_AFTER);
 
         ec.setExpressions(toBeExported);
 
@@ -1002,12 +1023,12 @@ public class ExportCommandTest extends Assert
 
         events.add(new FullCollection(
             new Timestamp(101101L).applyTimeOrigin(0L), 1001L,
-                new BeforeAfterMax(-1L, 1L, -1L, Unit.b), new BeforeAfterMax(-1L, 10L, -1L, Unit.b),
-                new BeforeAfterMax(-1L, -1L, -1L, Unit.b), new BeforeAfterMax(-1L, -1L, -1L, Unit.b), false));
+            new BeforeAfterMax(-1L, 1L, -1L, Unit.b), new BeforeAfterMax(-1L, 10L, -1L, Unit.b),
+            new BeforeAfterMax(-1L, -1L, -1L, Unit.b), new BeforeAfterMax(-1L, -1L, -1L, Unit.b), false));
 
         events.add(new NewGenerationCollection(
             new Timestamp(101102L).applyTimeOrigin(0L), 1002L,
-                new BeforeAfterMax(-1L, 2L, -1L, Unit.b), new BeforeAfterMax(-1L, -1L, -1L, Unit.b)));
+            new BeforeAfterMax(-1L, 2L, -1L, Unit.b), new BeforeAfterMax(-1L, -1L, -1L, Unit.b)));
 
         Series s = ec.toSeries(events);
 
@@ -1081,13 +1102,28 @@ public class ExportCommandTest extends Assert
         assertEquals(2L, lm.getLong());
     }
 
-    // Package protected -------------------------------------------------------------------------------------------------------------------
+    // Package protected -----------------------------------------------------------------------------------------------
 
-    // Protected ---------------------------------------------------------------------------------------------------------------------------
+    // Protected -------------------------------------------------------------------------------------------------------
 
-    // Private -----------------------------------------------------------------------------------------------------------------------------
+    // Private ---------------------------------------------------------------------------------------------------------
 
-    // Inner classes -----------------------------------------------------------------------------------------------------------------------
+    /**
+     * Tests the default behavior on unspecified -c. Called from more than one tests.
+     */
+    private void testDefaultCollectionTypes(Set<CollectionType> collectionTypes) throws Exception
+    {
+        CollectionType[] allCollectionTypes = CollectionType.values();
+
+        assertEquals(allCollectionTypes.length, collectionTypes.size());
+
+        for(CollectionType ct: allCollectionTypes)
+        {
+            assertTrue(collectionTypes.contains(ct));
+        }
+    }
+
+    // Inner classes ---------------------------------------------------------------------------------------------------
 }
 
 

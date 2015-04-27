@@ -105,7 +105,7 @@ public class ExportCommand implements Command
 
         if (collectionTypes.isEmpty())
         {
-            collectionTypes.add(CollectionType.FULL_COLLECTION);
+            collectionTypes.addAll(Arrays.asList(CollectionType.values()));
         }
 
         // if we did not specify types, install default
@@ -195,7 +195,7 @@ public class ExportCommand implements Command
         return expressionsToBeExported;
     }
 
-    // Package protected -------------------------------------------------------------------------------------------------------------------
+    // Package protected -----------------------------------------------------------------------------------------------
 
     /**
      * Package-exposed for testing.
@@ -214,14 +214,16 @@ public class ExportCommand implements Command
     }
 
     /**
-     * Convert the list of GC events to a generic series, after filtering the events we're not interested in and performing any unit
-     * conversions that might be required.
+     * Convert the list of GC events to a generic series, after filtering the events we're not interested in and
+     * performing any unit conversions that might be required.
      *
      * Package-exposed for testing.
      */
     Series toSeries(List<GCEvent> events) throws Exception
     {
-        Series s = new LinkedListSeries();
+        // we need to make sure that distinct GC events with the same timestamp are accepted, this is sometimes
+        // the case for quick CMS event successions
+        Series s = new LinkedListSeries(true);
         List<Header> headers = new ArrayList<Header>();
 
         for(Expression exp: expressionsToBeExported)

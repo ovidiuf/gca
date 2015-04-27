@@ -37,8 +37,8 @@ function create_release_bundle()
         fail "failed to copy ${project_home}/target/gc-analyzer.jar to ${rd}/lib"
     cp ${M2}/log4j/log4j/1.2.16/log4j-1.2.16.jar ${rd}/lib || \
         fail "failed to copy ${M2}/log4j/log4j/1.2.16/log4j-1.2.16.jar to ${rd}/lib"
-    cp ${M2}/com/novaordis/series/series/1.1.1-SNAPSHOT/series-1.1.1-SNAPSHOT.jar ${rd}/lib || \
-        fail "failed to copy ${M2}/com/novaordis/series/series/1.1.1-SNAPSHOT/series-1.1.1-SNAPSHOT.jar to ${rd}/lib"
+    cp ${M2}/com/novaordis/series/series/1.3/series-1.3.jar ${rd}/lib || \
+        fail "failed to copy ${M2}/com/novaordis/series/series/1.3-SNAPSHOT/series-1.3-SNAPSHOT.jar to ${rd}/lib"
 
     info ""
     info "zipping ${project_home}/target/gca-${version}.zip ..."

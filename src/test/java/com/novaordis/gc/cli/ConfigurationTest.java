@@ -301,7 +301,8 @@ public class ConfigurationTest extends Assert
         catch(UserErrorException e)
         {
             log.info(e.getMessage());
-            assertEquals("command line argument \"-c\" does not makes sense in the location it was specified", e.getMessage());
+            assertEquals(
+                "command line argument \"-c\" does not makes sense in the location it was specified", e.getMessage());
         }
     }
 
