@@ -103,11 +103,13 @@ The Time Origin
     as 04/19/13 23:01:00,000) or it can be inferred from the name of the GC log file being analyzed, if the file name matches specific
     patters. Example of supported patterns:
 
-    *.29-Dec-11-0808          (time origin will be initialized to 12/29/11 8:08:00 AM)
-    *.29-Dec-11-220344        (time origin will be initialized to 12/29/11 10:03:44 PM)
+    *.29-Dec-11-0808          (time origin will be initialized to 12/29/11 8:08:00 AM in the current time zone)
+    *.29-Dec-11-220344        (time origin will be initialized to 12/29/11 10:03:44 PM in the current time zone)
     *.08-28-2013_13-14-31
     *.log-08-28-2013_13-14-31
     *.24Apr15130823
+    *.24Apr22130823+0000      (this is equivalent with the previous timestamp, assuming we're in the PDT time zone)
+
 
 
         Example:

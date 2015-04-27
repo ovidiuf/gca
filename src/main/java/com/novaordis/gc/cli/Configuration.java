@@ -33,12 +33,16 @@ public class Configuration
         new SimpleDateFormat(COMMAND_LINE_TIME_ORIGIN_SPEC2);
 
 
+    //
+    // Order is important - attempt using the patterns that specify the time zone first
+    //
     public static final String[] FILE_NAME_TIME_ORIGIN_SPEC = new String[]
         {
             "dd-MMM-yy-HHmmss",      // 28-Dec-11-200855
             "dd-MMM-yy-HHmm",        // 28-Dec-11-2008
             "MM-dd-yyyy_HH-mm-ss",   // 08-28-2013_13-14-31 (and xxx.log-08-28-2013_13-14-31)
-            "ddMMMyyHHmmss"          // 24Apr15130823
+            "ddMMMyyHHmmssZ",         // 24Apr15010000+0700
+            "ddMMMyyHHmmss",          // 24Apr15130823
         };
 
     public static final SimpleDateFormat[] FILE_NAME_TIME_ORIGIN_FORMAT =

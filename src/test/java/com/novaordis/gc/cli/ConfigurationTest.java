@@ -162,7 +162,7 @@ public class ConfigurationTest extends Assert
         assertEquals(Configuration.COMMAND_LINE_TIME_ORIGIN_FORMAT2.parse("12/20/11 00:01:02,004").getTime(), c.getTimeOrigin().longValue());
     }
 
-    // target file tests -------------------------------------------------------------------------------------------------------------------
+    // target file tests -----------------------------------------------------------------------------------------------
 
     @Test
     public void testFile_FileDoesNotExist() throws Exception
@@ -270,6 +270,18 @@ public class ConfigurationTest extends Assert
         Long time = Configuration.fileNameToTimeOrigin("gc.log.24Apr15130823");
         String s = new SimpleDateFormat("yy-MM-dd hh-mm-ss a").format(time);
         assertEquals("15-04-24 01-08-23 PM", s);
+    }
+
+    //
+    // gc.log.24Apr22130823+0000
+    //
+
+    @Test
+    public void fileNameToTimeOrigin_ddmmmyyHHMMSSZ() throws Exception
+    {
+        Long time = Configuration.fileNameToTimeOrigin("gc.log.24Apr15080000+0000");
+        String s = new SimpleDateFormat("yy-MM-dd hh-mm-ss a").format(time);
+        assertEquals("15-04-24 01-00-00 AM", s); // this assumes we're in PDT, otherwise will fail (TODO fix this)
     }
 
     // no time origin --------------------------------------------------------------------------------------------------

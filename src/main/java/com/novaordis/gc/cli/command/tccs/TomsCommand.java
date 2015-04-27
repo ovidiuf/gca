@@ -104,8 +104,7 @@ public class TomsCommand extends TimestampConversionCommand
         catch(Exception e)
         {
             throw new UserErrorException(
-                "the format that has been provided '" + timestampFormatLiteral +
-                    "' does not seem to be a valid timestamp format", e);
+                "'" + timestampFormatLiteral + "' does not seem to be a valid timestamp format", e);
         }
 
         try
@@ -115,7 +114,7 @@ public class TomsCommand extends TimestampConversionCommand
         catch(Exception e)
         {
             throw new UserErrorException(
-                "the timestamp that has been provided '" + timestampLiteral +
+                "'" + timestampLiteral +
                     "' cannot be converted to a timestamp using the format '" + timestampFormatLiteral + "'", e);
         }
     }
