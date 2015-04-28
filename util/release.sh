@@ -33,8 +33,8 @@ function create_release_bundle()
         fail "failed to copy ${project_home}/src/main/bash/std.shlib to ${rd}/lib"
     cp ${project_home}/src/main/resources/log4j.xml ${rd}/lib || \
         fail "failed to copy ${project_home}/src/main/resources/log4j.xml to ${rd}/lib"
-    cp ${project_home}/target/gc-analyzer.jar ${rd}/lib || \
-        fail "failed to copy ${project_home}/target/gc-analyzer.jar to ${rd}/lib"
+    cp ${project_home}/target/gca.jar ${rd}/lib || \
+        fail "failed to copy ${project_home}/target/gca.jar to ${rd}/lib"
     cp ${M2}/log4j/log4j/1.2.16/log4j-1.2.16.jar ${rd}/lib || \
         fail "failed to copy ${M2}/log4j/log4j/1.2.16/log4j-1.2.16.jar to ${rd}/lib"
     cp ${M2}/com/novaordis/series/series/1.3/series-1.3.jar ${rd}/lib || \

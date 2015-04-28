@@ -1,4 +1,6 @@
 
+gca ${version}
+
 Usage:
 
     gca [-t|--time-origin MM/dd/yy HH:mm:ss,SSS] [global-options] <gc-log-file> [command] [command-arguments]

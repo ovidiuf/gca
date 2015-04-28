@@ -22,8 +22,6 @@ public class Configuration
 
     private static final Logger log = Logger.getLogger(Configuration.class);
 
-    public static final String VERSION = "1.1.7-SNAPSHOT";
-
     public static final String COMMAND_LINE_TIME_ORIGIN_SPEC = "MM/dd/yy HH:mm:ss";
     public static final SimpleDateFormat COMMAND_LINE_TIME_ORIGIN_FORMAT =
         new SimpleDateFormat(COMMAND_LINE_TIME_ORIGIN_SPEC);
