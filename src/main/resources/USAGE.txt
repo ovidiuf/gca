@@ -99,9 +99,9 @@ Commands:
 
 The Time Origin
 
-    The time origin can be specified with -t|--time-origin in the MM/dd/yy HH:mm:ss,SSS format (April 19 2013 11:01:00,000 PM is specified
-    as 04/19/13 23:01:00,000) or it can be inferred from the name of the GC log file being analyzed, if the file name matches specific
-    patters. Example of supported patterns:
+    The time origin can be specified with -t|--time-origin in the MM/dd/yy HH:mm:ss,SSS format
+    (April 19 2013 11:01:00,000 PM is specified as 04/19/13 23:01:00,000) or it can be inferred from the name of the GC
+    log file being analyzed, if the file name matches specific patters. Example of supported patterns:
 
     *.29-Dec-11-0808          (time origin will be initialized to 12/29/11 8:08:00 AM in the current time zone)
     *.29-Dec-11-220344        (time origin will be initialized to 12/29/11 10:03:44 PM in the current time zone)
@@ -110,6 +110,8 @@ The Time Origin
     *.24Apr15130823
     *.24Apr22130823+0000      (this is equivalent with the previous timestamp, assuming we're in the PDT time zone)
 
+    Note that you must use +ZZZZ notation to eliminate ambiguity about time zones, otherwise all timestamps will be
+    considered to be in the current time zone.
 
 
         Example:
@@ -120,16 +122,16 @@ The Time Origin
 
 Global Options
 
-    --suppress-timestamp-warning - if PrintGCDateStamps was used when generating the GC logs (so the full timestamps are present) and
-                the time origin information was specified, it is possible and actually very likely that a difference exists between
-                the recorded timestamps and calculated timestamps, mainly because the origin is not usually specified with millisecond
-                precision. If such a difference is detected, gca will warn on stdout. In order to suppress the warnings, use the
-                --suppress-timestamp-warning global option.
+    --suppress-timestamp-warning - if PrintGCDateStamps was used when generating the GC logs (so the full timestamps are
+                present) and the time origin information was specified, it is possible and actually very likely that a
+                difference exists between the recorded timestamps and calculated timestamps, mainly because the origin
+                is not usually specified with millisecond precision. If such a difference is detected, gca will warn on
+                stdout. In order to suppress the warnings, use the --suppress-timestamp-warning global option.
 
 Expressions
 
-    It is important NOT to use space between an expression's elements. "og-after/og-capacity*100" is correct, "og-after / og-capacity * 100"
-    is not.
+    It is important NOT to use space between an expression's elements. "og-after/og-capacity*100" is correct,
+    "og-after / og-capacity * 100" is not.
 
     As per current version, expressions are not fully implemented, so some may work and some may not.
 
