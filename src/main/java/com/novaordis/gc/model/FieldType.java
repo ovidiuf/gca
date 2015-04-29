@@ -219,7 +219,7 @@ public enum FieldType implements Expression
     {
         if (value == null)
         {
-            throw new IllegalArgumentException(this + " cannot to convert " + value + " to a metric");
+            throw new IllegalArgumentException(this + " cannot to convert null to a metric");
         }
 
         if (!type.equals(value.getClass()))

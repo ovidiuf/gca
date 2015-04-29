@@ -222,10 +222,10 @@ public class TimestampTest
         Timestamp ts = new Timestamp(literal, time, offset, 0, 37);
 
         String literal2 = "2015-01-01T01:01:01.001-0700 2.222";
-        long time2 = Timestamp.DATESTAMP_FORMAT.parse(literal.substring(0, literal.indexOf(' '))).getTime();
-        long offset2 = Timestamp.offsetToLong(literal.substring(literal.indexOf(' ') + 1), null);
+        long time2 = Timestamp.DATESTAMP_FORMAT.parse(literal2.substring(0, literal2.indexOf(' '))).getTime();
+        long offset2 = Timestamp.offsetToLong(literal2.substring(literal2.indexOf(' ') + 1), null);
 
-        Timestamp ts2 = new Timestamp(literal, time, offset, 0, 37);
+        Timestamp ts2 = new Timestamp(literal2, time2, offset2, 0, 37);
 
         // timestamps are equal if the time is equal - even for different offsets
 
