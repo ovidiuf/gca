@@ -93,13 +93,13 @@ public enum FieldType implements Expression
     // (example: "598272.974: [GC 598272.975: [ParNew: ..."), so we use the leading timestamp as reference as part of
     // the timestamp state but we keep the embedded offset literal around, just in case.
     //
-    EMBEDDED_TIMESTAMP_LITERAL("", "", null, String.class, null);
+    EMBEDDED_TIMESTAMP_LITERAL("Embedded Timestamp", "embedded-timestamp", null, String.class, null);
 
-    // Constants ---------------------------------------------------------------------------------------------------------------------------
+    // Constants -------------------------------------------------------------------------------------------------------
 
-    // Static ------------------------------------------------------------------------------------------------------------------------------
+    // Static ----------------------------------------------------------------------------------------------------------
 
-    // Attributes --------------------------------------------------------------------------------------------------------------------------
+    // Attributes ------------------------------------------------------------------------------------------------------
 
     /**
      * The human readable label - this is how this field will be represented externally, in CSV files for example.
@@ -120,7 +120,7 @@ public enum FieldType implements Expression
 
     public Unit defaultUnit;
 
-    // Constructors ------------------------------------------------------------------------------------------------------------------------
+    // Constructors ----------------------------------------------------------------------------------------------------
 
     FieldType(String label, String commandLineLabel, Unit defaultUnit, Class type, FieldCategory category)
     {
@@ -131,7 +131,7 @@ public enum FieldType implements Expression
         this.category = category;
     }
 
-    // Expression implementation -----------------------------------------------------------------------------------------------------------
+    // Expression implementation ---------------------------------------------------------------------------------------
 
     @Override
     public Header toHeader(Unit targetUnit) throws Exception
@@ -201,19 +201,19 @@ public enum FieldType implements Expression
         return category;
     }
 
-    // Public ------------------------------------------------------------------------------------------------------------------------------
+    // Public ----------------------------------------------------------------------------------------------------------
 
     /**
-     * If the FieldType's category is FieldCategory.MEMORY and we convert (targetUnit not null) we will get DoubleMetric instead of
-     * LongMetric.
+     * If the FieldType's category is FieldCategory.MEMORY and we convert (targetUnit not null) we will get DoubleMetric
+     * instead of LongMetric.
      *
      * @param value - must be an instance of the Class type, otherwise InvalidArgumentException is thrown.
      *
-     * @param targetUnit - the unit we want the result metric to be expressed in. If null, no conversion will be performed. If the
-     *        unit cannot be applied to the type, IllegalArgumentException will be thrown.
+     * @param targetUnit - the unit we want the result metric to be expressed in. If null, no conversion will be
+     *                   performed. If the unit cannot be applied to the type, IllegalArgumentException will be thrown.
      *
-     * @throws IllegalArgumentException on null or type-mismatched values, or the metric cannot be applied to this type, or a unit that
-     *         cannot be applied to this type.
+     * @throws IllegalArgumentException on null or type-mismatched values, or the metric cannot be applied to this type,
+     * or a unit that cannot be applied to this type.
      */
     public Metric toMetric(Object value, Unit targetUnit)
     {
@@ -224,7 +224,8 @@ public enum FieldType implements Expression
 
         if (!type.equals(value.getClass()))
         {
-            throw new IllegalArgumentException(this + " cannot to convert " + value + "(" + value.getClass() + ") to a metric");
+            throw new IllegalArgumentException(
+                this + " cannot to convert " + value + "(" + value.getClass() + ") to a metric");
         }
 
         // for the time being, we can only convert MEMORY, anything else will throw an exception
@@ -234,7 +235,10 @@ public enum FieldType implements Expression
         }
 
         if (targetUnit != null && FieldCategory.MEMORY.equals(category) &&
-                (!Unit.b.equals(targetUnit) && !Unit.K.equals(targetUnit) && !Unit.M.equals(targetUnit) && !Unit.G.equals(targetUnit)))
+                (!Unit.b.equals(targetUnit) &&
+                    !Unit.K.equals(targetUnit) &&
+                    !Unit.M.equals(targetUnit) &&
+                    !Unit.G.equals(targetUnit)))
         {
             throw new IllegalArgumentException("incompatible unit " + targetUnit);
         }
@@ -275,12 +279,12 @@ public enum FieldType implements Expression
         }
     }
 
-    // Package protected -------------------------------------------------------------------------------------------------------------------
+    // Package protected -----------------------------------------------------------------------------------------------
 
-    // Protected ---------------------------------------------------------------------------------------------------------------------------
+    // Protected -------------------------------------------------------------------------------------------------------
 
-    // Private -----------------------------------------------------------------------------------------------------------------------------
+    // Private ---------------------------------------------------------------------------------------------------------
 
-    // Inner classes -----------------------------------------------------------------------------------------------------------------------
+    // Inner classes ---------------------------------------------------------------------------------------------------
 
 }
