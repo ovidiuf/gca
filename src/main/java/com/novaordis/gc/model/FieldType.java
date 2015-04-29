@@ -87,7 +87,13 @@ public enum FieldType implements Expression
     HEAP_CAPACITY("Heap (NG and OG) Capacity", "heap-capacity", Unit.b, Long.class, FieldCategory.MEMORY),
 
     // special event notes, such as "promotion failed" etc.
-    NOTES("Notes", "notes", null, String.class, null);
+    NOTES("Notes", "notes", null, String.class, null),
+
+    // String. There are situations when the leading timestamp and the embedded timestamp do not match
+    // (example: "598272.974: [GC 598272.975: [ParNew: ..."), so we use the leading timestamp as reference as part of
+    // the timestamp state but we keep the embedded offset literal around, just in case.
+    //
+    EMBEDDED_TIMESTAMP_LITERAL("", "", null, String.class, null);
 
     // Constants ---------------------------------------------------------------------------------------------------------------------------
 

@@ -25,10 +25,16 @@ public class NewGenerationCollection extends GCEventBase
 
     public NewGenerationCollection(Timestamp ts, long duration, BeforeAfterMax ng, BeforeAfterMax heap)
     {
-        this(ts, duration, ng, heap, null); // no notes
+        this(ts, duration, ng, heap, null, null); // no notes, no embeddedTimestampLiteral
     }
 
-    public NewGenerationCollection(Timestamp ts, long duration, BeforeAfterMax ng, BeforeAfterMax heap, String notes)
+    /**
+     * @param embeddedTimestampLiteral - there are situations when the leading timestamp and the embedded timestamp
+     *        do not match (example: "598272.974: [GC 598272.975: [ParNew: ...")), so we use the leading timestamp as
+     *        reference as part of the timestamp state but we keep the embedded offset literal around, just in case.
+     */
+    public NewGenerationCollection(Timestamp ts, long duration, BeforeAfterMax ng, BeforeAfterMax heap,
+                                   String notes, String embeddedTimestampLiteral)
     {
         super(ts, duration, notes);
 
@@ -46,6 +52,11 @@ public class NewGenerationCollection extends GCEventBase
             setField(FieldType.HEAP_BEFORE, new Field(FieldType.HEAP_BEFORE, Util.convertToBytes(heap.getUnit(), heap.getBefore())));
             setField(FieldType.HEAP_AFTER, new Field(FieldType.HEAP_AFTER, Util.convertToBytes(heap.getUnit(), heap.getAfter())));
             setField(FieldType.HEAP_CAPACITY, new Field(FieldType.HEAP_CAPACITY, Util.convertToBytes(heap.getUnit(), heap.getMax())));
+        }
+
+        if (embeddedTimestampLiteral != null)
+        {
+            setField(FieldType.EMBEDDED_TIMESTAMP_LITERAL, new Field(FieldType.EMBEDDED_TIMESTAMP_LITERAL, embeddedTimestampLiteral));
         }
     }
 

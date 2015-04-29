@@ -1,11 +1,21 @@
 package com.novaordis.gc.parser.linear;
 
+import com.novaordis.gc.model.Field;
 import com.novaordis.gc.model.FieldType;
 import com.novaordis.gc.model.Timestamp;
 import com.novaordis.gc.model.event.GCEvent;
 import com.novaordis.gc.model.event.NewGenerationCollection;
+import com.novaordis.gc.parser.GCLogParser;
+import com.novaordis.gc.parser.GCLogParserFactory;
+import com.novaordis.gc.parser.TimeOrigin;
+import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.List;
 
 /**
  * @author <a href="mailto:ovidiu@novaordis.com">Ovidiu Feodorov</a>
@@ -15,6 +25,8 @@ import org.junit.Test;
 public class NewGenerationCollectionParserTest extends Assert
 {
     // Constants -------------------------------------------------------------------------------------------------------
+
+    private static final Logger log = Logger.getLogger(NewGenerationCollectionParserTest.class);
 
     // Static ----------------------------------------------------------------------------------------------------------
 
@@ -92,6 +104,76 @@ public class NewGenerationCollectionParserTest extends Assert
         assertEquals(54, e.getDuration(), 0.0001);
     }
 
+    // embedded timestamp tests ----------------------------------------------------------------------------------------
+
+    // These are NG tests because I've seen the condition only showing up in case of NG collections, but we need to use
+    // the entire parser to catch it, as it involves leading timestamp processing.
+
+    @Test
+    public void embedded_timestamp_leadingTimestampBeforeEmbeddedTimestamp() throws Exception
+    {
+        String s = "598272.974: [GC 598272.975: [ParNew: 4374049K->1247393K(4518144K), 0.3814120 secs] 13519475K->10668769K(16567552K), 0.3819210 secs] [Times: user=1.27 sys=0.00, real=0.38 secs]";
+
+        Reader r = new InputStreamReader(new ByteArrayInputStream(s.getBytes()));
+        GCLogParser p = GCLogParserFactory.getParser(r);
+        assertTrue(p instanceof LinearScanParser);
+
+        List<GCEvent> events = p.parse(new TimeOrigin(0L));
+
+        r.close();
+
+        assertEquals(1, events.size());
+
+        NewGenerationCollection ng = (NewGenerationCollection)events.get(0);
+
+        Field field = ng.get(FieldType.EMBEDDED_TIMESTAMP_LITERAL);
+        assertNotNull(field);
+        String value = (String)field.getValue();
+
+        assertEquals("598272.975", value);
+        assertEquals(598272974L, ng.getTime().longValue());
+    }
+
+    @Test
+    public void embedded_timestamp_leadingTimestampAfterEmbeddedTimestamp() throws Exception
+    {
+        String s = "598272.976: [GC 598272.975: [ParNew: 4374049K->1247393K(4518144K), 0.3814120 secs] 13519475K->10668769K(16567552K), 0.3819210 secs] [Times: user=1.27 sys=0.00, real=0.38 secs]";
+
+        Reader r = new InputStreamReader(new ByteArrayInputStream(s.getBytes()));
+
+        GCLogParser p = GCLogParserFactory.getParser(r);
+        assertTrue(p instanceof LinearScanParser);
+
+        try
+        {
+            p.parse(new TimeOrigin(0L));
+            fail("should fail with IllegalStateException because 598272.976 does not precede or equal with 598272.975");
+        }
+        catch(IllegalStateException e)
+        {
+            log.info(e.getMessage());
+        }
+
+        r.close();
+    }
+
+    @Test
+    public void duplicateTimestamp_TimestampsDoNotMatch() throws Exception
+    {
+        String line = "[GC 53233.950: [ParNew: 4070928K->986133K(4373760K), 0.0997910 secs] 12266198K->9181403K(16039168K), 0.1002900 secs] [Times: user=0.76 sys=0.00, real=0.10 secs]";
+
+        NewGenerationCollectionParser p = new NewGenerationCollectionParser();
+
+        Timestamp ts = new Timestamp(53233949L).applyTimeOrigin(0L);
+
+        GCEvent event = p.parse(ts, line, 77L, null);
+
+        NewGenerationCollection ng = (NewGenerationCollection)event;
+
+        assertEquals(53233949L, ng.getTime().longValue());
+        assertEquals("53233.950", ng.get(FieldType.EMBEDDED_TIMESTAMP_LITERAL).getValue());
+    }
+
     @Test
     public void embeddedOffsetPrecedesThanLineStartOffset() throws Exception
     {
@@ -101,9 +183,15 @@ public class NewGenerationCollectionParserTest extends Assert
 
         Timestamp ts = new Timestamp(1986L);
 
-        GCEvent event = p.parse(ts, line, 10, null);
-
-        assertNull("should have bailed out on the event, mismatching offset", event);
+        try
+        {
+            p.parse(ts, line, 10, null);
+            fail("should fail with IllegalStateException e");
+        }
+        catch(IllegalStateException e)
+        {
+            log.info(e.getMessage());
+        }
     }
 
     @Test
@@ -132,6 +220,8 @@ public class NewGenerationCollectionParserTest extends Assert
 
         assertEquals(9, e.getDuration(), 0.0001);
     }
+
+    // ParNew ----------------------------------------------------------------------------------------------------------
 
     @Test
     public void testParNew() throws Exception
@@ -249,21 +339,6 @@ public class NewGenerationCollectionParserTest extends Assert
     }
 
     @Test
-    public void duplicateTimestamp_TimestampsDoNotMatch() throws Exception
-    {
-        String line = "[GC 53233.950: [ParNew: 4070928K->986133K(4373760K), 0.0997910 secs] 12266198K->9181403K(16039168K), 0.1002900 secs] [Times: user=0.76 sys=0.00, real=0.10 secs]";
-
-        NewGenerationCollectionParser p = new NewGenerationCollectionParser();
-
-        Timestamp ts = new Timestamp(53233951L);
-
-        GCEvent event = p.parse(ts, line, 77L, null);
-
-        // temporarily dropping this line as unparseable
-        assertNull(event);
-    }
-
-    @Test
     public void testDefNew() throws Exception
     {
         String line = "[GC 4.993: [DefNew: 204800K->20403K(307200K), 0.0417850 secs] 204800K->20403K(1126400K), 0.0418540 secs] [Times: user=0.02 sys=0.02, real=0.04 secs]";
@@ -315,7 +390,6 @@ public class NewGenerationCollectionParserTest extends Assert
         assertNull(e.get(FieldType.HEAP_CAPACITY));
         assertEquals(99, e.getDuration(), 0.01);
     }
-
 
     // Package protected -------------------------------------------------------------------------------------------------------------------
 

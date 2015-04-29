@@ -49,6 +49,8 @@ public class NewGenerationCollectionParser extends GCEventParserBase
      * considering them equivalent.
      *
      * @see com.novaordis.gc.parser.GCEventParser#parse(com.novaordis.gc.model.Timestamp, String, long, GCEvent)
+     *
+     * @exception IllegalStateException when invalid constructs are detected
      */
     @Override
     public GCEvent parse(Timestamp ts, String line, long lineNumber, GCEvent current) throws ParserException
@@ -72,15 +74,23 @@ public class NewGenerationCollectionParser extends GCEventParserBase
 
             String hs = tokens.get(0);
 
-            // sanity check: verify that line start offset precedes embedded offset
-            Timestamp embeddedOffset;
+            // sanity check: verify that line start timestamp precedes embedded timestamp; save the embedded timestamp
+            // if the line start timestamp is smaller than the embedded timestamp
+            Timestamp embeddedTs;
+            String embeddedTsLiteral = null;
+
             if (hs.startsWith("GC ") &&
-                ((embeddedOffset = Timestamp.find(hs.substring("GC ".length()) + " ", 0, lineNumber)) != null))
+                ((embeddedTs = Timestamp.find(hs.substring("GC ".length()) + " ", 0, lineNumber)) != null))
             {
-                if (ts.getOffset() > embeddedOffset.getOffset())
+                if (ts.getOffset() > embeddedTs.getOffset())
                 {
-                    throw new ParserException(
-                        "embedded offset " + hs + " precedes line start offset " + ts.getLiteral(), lineNumber);
+                    throw new IllegalStateException("embedded offset " + hs + " precedes line start offset " + ts.getLiteral() + " on line " + lineNumber);
+                }
+                else if (ts.getOffset() < embeddedTs.getOffset())
+                {
+                    // we've seen this happening, the leading offset not matching the embedded offset; we keep
+                    // the embedded timestamp around just in case
+                    embeddedTsLiteral = embeddedTs.getLiteral();
                 }
             }
 
@@ -199,19 +209,20 @@ public class NewGenerationCollectionParser extends GCEventParserBase
                 duration = Duration.toLongMilliseconds(durationString, lineNumber);
             }
 
-            NewGenerationCollection event = new NewGenerationCollection(ts, duration, ng, heap, notes);
+            NewGenerationCollection event = new NewGenerationCollection(ts, duration, ng, heap, notes, embeddedTsLiteral);
 
             log.debug(event);
             return event;
         }
+        catch(IllegalStateException e)
+        {
+            // let the illegal state exceptions bubble through
+            throw e;
+        }
         catch(Exception e)
         {
-//            throw new ParserException(
-//                    "invalid/unrecognized New Generation Collection line: \"" + line + "\"" +
-//                            (e.getMessage() != null ? ", " + e.getMessage() : ""), e, lineNumber);
-            log.warn(
-                "line " + lineNumber + ": invalid/unrecognized New Generation Collection line: \"" + line + "\"" +
-                    (e.getMessage() != null ? ", " + e.getMessage() : ""));
+            log.warn("line " + lineNumber + ": invalid/unrecognized New Generation Collection line: \"" + line + "\"" +
+                (e.getMessage() != null ? ", " + e.getMessage() : ""));
 
             return null;
         }

@@ -190,6 +190,13 @@ public class TimestampTest
         assertNull(t.getDateStampLiteral());
     }
 
+    // getLiteral() ----------------------------------------------------------------------------------------------------
+
+    //
+    // these tests are here because pre 1.2 we noticed situations where getLiteral() was different from the literal
+    // read from the gc log file, and that caused problems while searching for the literal in the original file
+    //
+
     // equals() --------------------------------------------------------------------------------------------------------
 
     @Test
