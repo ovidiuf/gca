@@ -59,7 +59,7 @@ public class CMSParserTest extends Assert
     @Test
     public void cmsFullCycle() throws Exception
     {
-        InputStream is = CMSParserTest.class.getClassLoader().getResourceAsStream("collected/cms-full-cycle.log");
+        InputStream is = CMSParserTest.class.getClassLoader().getResourceAsStream("collected/cms-clean-full-cycle.log");
         assertNotNull(is);
 
         InputStreamReader isr = new InputStreamReader(is);

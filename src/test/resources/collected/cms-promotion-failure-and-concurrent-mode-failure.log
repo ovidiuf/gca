@@ -8,5 +8,5 @@
  CMS: abort preclean due to time 598285.838: [CMS-concurrent-abortable-preclean: 5.257/5.471 secs] [Times: user=9.98 sys=3.75, real=5.47 secs] 
 598285.842: [GC[YG occupancy: 2108465 K (4518144 K)]598285.842: [Rescan (parallel) , 0.3122640 secs]598286.155: [weak refs processing, 1.2856380 secs]598287.440: [scrub string table, 0.0041470 secs] [1 CMS-remark: 9968457K(12049408K)] 12076923K(16567552K), 1.6025190 secs] [Times: user=3.31 sys=0.01, real=1.61 secs] 
 598287.445: [CMS-concurrent-sweep-start]
-598303.916: [GC 598303.916: [ParNew (promotion failed): 4264243K->4393664K(4518144K), 0.6453570 secs]598304.562: [CMS598318.636: [CMS-concurrent-sweep: 30.176/31.191 secs] [Times: user=47.43 sys=3.72, real=31.18 secs] 
-Apr 16 21:53:58 ts12009 logger:  (concurrent mode failure): 8527958K->7765164K(12049408K), 35.8110060 secs] 12653057K->7765164K(16567552K), [CMS Perm : 130459K->122567K(216772K)], 36.4568820 secs] [Times: user=37.22 sys=0.00, real=36.46 secs] 
+598303.916: [GC 598303.916: [ParNew (promotion failed): 4264243K->4393664K(4518144K), 0.6453570 secs]598304.562: [CMS598318.636: [CMS-concurrent-sweep: 30.176/31.191 secs] [Times: user=47.43 sys=3.72, real=31.18 secs]
+ (concurrent mode failure): 8527958K->7765164K(12049408K), 35.8110060 secs] 12653057K->7765164K(16567552K), [CMS Perm : 130459K->122567K(216772K)], 36.4568820 secs] [Times: user=37.22 sys=0.00, real=36.46 secs]
