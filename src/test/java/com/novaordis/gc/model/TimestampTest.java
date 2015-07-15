@@ -4,6 +4,7 @@ import com.novaordis.gc.parser.ParserException;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 
 import static org.junit.Assert.assertEquals;
@@ -696,6 +697,20 @@ public class TimestampTest
         assertEquals(8, r.getEndPosition());
         assertEquals("0.472", r.getLiteral());
         assertEquals("0.472", r.getOffsetLiteral());
+    }
+
+    @Test
+    public void find_collected_1() throws Exception
+    {
+        String line = "2015-06-02T15:41:31.851+0200: 16.039: [GC [PSYoungGen: 3145728K->29296K(3670016K)] 3145728K->29304K(9961472K), 0.0229910 secs] [5020bb35fd369b68f7a991b45747f584es: user=0.05 sys=0.01, real=0.02 secs] ";
+
+        Timestamp t = Timestamp.find(line, 0, -1L);
+
+        assertNotNull(t);
+
+        assertEquals(0, t.getStartPosition());
+        assertEquals(38, t.getEndPosition());
+        assertEquals(TEST_DATE_FORMAT.parse("15/06/02 15:41:31,851 +0200").getTime(), t.getTime().longValue());
     }
 
     // applyTimeOrigin() -----------------------------------------------------------------------------------------------

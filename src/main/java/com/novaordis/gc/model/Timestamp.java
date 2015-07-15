@@ -33,9 +33,14 @@ public class Timestamp
     public static final String OFFSET_FORMAT_LITERAL = "#0.000";
     public static final DecimalFormat OFFSET_FORMAT = new DecimalFormat(OFFSET_FORMAT_LITERAL);
 
+    // "5.837: "
     public static final Pattern OFFSET_PATTERN = Pattern.compile("\\d+\\.\\d\\d\\d: ");
-    public static final Pattern DATESTAMP_PATTERN = Pattern.compile("\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d-\\d\\d\\d\\d: ");
-    public static final Pattern COMBINED_PATTERN = Pattern.compile("\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d-\\d\\d\\d\\d: \\d+\\.\\d\\d\\d: ");
+
+    // "2014-08-14T01:12:28.620-0700: ", "2015-06-02T15:41:31.851+0200: "
+    public static final Pattern DATESTAMP_PATTERN = Pattern.compile("\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d[-|+]\\d\\d\\d\\d: ");
+
+    // "2014-08-14T01:12:28.620-0700: 27036.838: ", "2015-06-02T15:41:31.851+0200: 16.039:
+    public static final Pattern COMBINED_PATTERN = Pattern.compile("\\d\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d\\d\\d[-|+]\\d\\d\\d\\d: \\d+\\.\\d\\d\\d: ");
 
     // start with the combined pattern, to make sure it is found first
     private static final Pattern[] TIMESTAMP_PATTERNS = new Pattern[]

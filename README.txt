@@ -18,7 +18,7 @@ Modify Configuration.VERSION to match the pom.xml version.
 
 Then, run:
 
-    ./util/release.sh
+    ./util/release.sh [--no-tests]
 
 This will do the maven build, zip the release bundle and place it in ./target.
 
@@ -29,6 +29,7 @@ Run:
     ./util/install-locally.sh <version-to-install>
 
 This will do the maven build, zip the release bundle and install in the right location.
+
 
 After that you should be able to:
 
