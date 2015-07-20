@@ -1,7 +1,6 @@
 package com.novaordis.gc.cli.command;
 
 import com.novaordis.gc.cli.Command;
-import com.novaordis.gc.cli.Configuration;
 import com.novaordis.gc.cli.Util;
 import com.novaordis.gc.model.event.GCEvent;
 import org.apache.log4j.Logger;
@@ -26,13 +25,10 @@ public class VersionCommand implements Command
 
     // Attributes --------------------------------------------------------------------------------------------------------------------------
 
-    private Configuration c;
-
     // Constructors ------------------------------------------------------------------------------------------------------------------------
 
-    public VersionCommand(Configuration c, Iterator<String> args)
+    public VersionCommand(Iterator<String> args)
     {
-        this.c = c;
         log.debug("ignored " + args);
     }
 
@@ -47,7 +43,8 @@ public class VersionCommand implements Command
     @Override
     public void execute(List<GCEvent> events) throws Exception
     {
-        Util.displayContentFromClasspath("VERSION");
+        String s = Util.getVersion() + " released on " + Util.getReleaseDate();
+        System.out.println(s);
     }
 
     // Public ------------------------------------------------------------------------------------------------------------------------------

@@ -5,20 +5,21 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.novaordis.gc</groupId>
-    <artifactId>gc-analyzer</artifactId>
+    <groupId>com.novaordis.gca</groupId>
+    <artifactId>gca</artifactId>
     <packaging>jar</packaging>
 
-    <version>1.2-SNAPSHOT</version>
+    <version>1.2.1</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <test.scratch.directory>target/test-scratch</test.scratch.directory>
         <test.log.directory>target</test.log.directory>
+        <maven.build.timestamp.format>MM/dd/yy</maven.build.timestamp.format>
+        <release_date>${maven.build.timestamp}</release_date>
     </properties>
 
     <build>
-        <finalName>gca</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

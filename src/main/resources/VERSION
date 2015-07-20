@@ -1,1 +1,2 @@
-${version}
+version=${version}
+release_date=${release_date}

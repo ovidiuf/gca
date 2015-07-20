@@ -1,0 +1,438 @@
+#!/bin/bash
+
+function usage()
+{
+cat  <<EOF
+
+Provider of a uniform command set to build the installable artifact and install it locally or
+remotely.
+
+    ./install [--verbose|-v] [--force] [--clean] [--no-tests] [--zip-only] [environment-name]
+
+Where:
+
+    --force -   if the version being installed is already installed, the script will stop,  unless
+        --force is specified.
+
+    environment-name -   the name of the environment to install into.  If  not  specified  install
+        locally.  A list  of  environments  and  associated  configuration  can  be  found  in the
+        ./util/environments directory.
+
+Other Options:
+
+    --help
+
+    --clean - performs an maven clean before attempting to build
+
+    --no-tests
+
+    --zip-only - does not perform the last step of actually installing the zip, just builds it and
+        leaves it in the ./target directory.
+
+
+Examples:
+
+
+    Build and install the current version locally:
+
+        ./install
+
+    Build and install the current version locally, overwritting the copy that is already
+    installed.
+
+        ./install --force
+
+    Build and install the current version in ec2-default, overwritting the copy that is
+    already installed.
+
+        ./install ec2-default --force
+
+EOF
+}
+
+help=false
+verbose=false
+no_tests=false
+project_home="."
+
+function debug()
+{
+    ${verbose} && echo "$@" 1>&2;
+    return 0
+}
+
+function debug-arguments
+{
+    ${verbose} && echo "${FUNCNAME[1]}($@)" 1>&2;
+    return 0
+}
+
+function fail
+{
+    echo "[error]: $@" 1>&2 && exit 1
+}
+
+#
+# returns the version from pom.xml
+#
+function get-version()
+{
+    debug-arguments $@
+    [ -z ${project_home} ] && fail "global variable 'project_home' not defined"
+    local pom_file=${project_home}/pom.xml
+    [ -f ${pom_file} ] || fail "POM file ${pom_file} not found"
+    local line;
+    line=$(grep "^ *<version>" ${pom_file} | head -1) || fail "failed to get <version> from ${pom_file}"
+    [ "${line}" = "" ] && fail "empty version in ${pom_file}"
+    local version;
+    version=${line#*>}
+    version=${version%%\<*}
+    [ "${version}" = "" ] && fail "could not extract version from ${pom_file}"
+    echo ${version}
+}
+
+#
+# returns the artifact base name from pom.xml by reading 'artifactId' or 'finalName' (if it exists).
+# 'finalName' (if it exists) takes priority.
+#
+function get-artifact-base-name()
+{
+    debug-arguments $@
+    [ -z ${project_home} ] && fail "global variable 'project_home' not defined"
+    local pom_file=${project_home}/pom.xml
+    [ -f ${pom_file} ] || fail "POM file ${pom_file} not found"
+    local line;
+    local artifact_base_name;
+
+    # first try 'finalName' ...
+    line=$(grep "^ *<finalName>" ${pom_file} | head -1)
+    if [ -z "${line}" ]; then
+        # ... then try 'artifactId'.
+        line=$(grep "^ *<artifactId>" ${pom_file} | head -1) || fail "failed to get <artifactId> from ${pom_file}"
+        [ "${line}" = "" ] && fail "empty artifactId in ${pom_file}"
+    fi
+    artifact_base_name=${line#*>}
+    artifact_base_name=${artifact_base_name%%\<*}
+    [ "${artifact_base_name}" = "" ] && fail "could not extract artifact base name from ${pom_file}"
+    echo ${artifact_base_name}
+}
+
+function get-artifact-zip-name()
+{
+    debug-arguments $@
+    local version
+    version=$(get-version) || exit 1
+    local artifact_base_name;
+    artifact_base_name=$(get-artifact-base-name) || exit 1
+    echo ${artifact_base_name}-${version}.zip
+}
+
+function clean()
+{
+    debug-arguments $@
+    [ -z ${project_home} ] && fail "global variable 'project_home' not defined"
+
+    local maven_quiet="-q"
+    ${verbose} && maven_quiet=""
+
+    (cd ${project_home}; mvn ${maven_quiet} clean) && debug "mvn ${maven_quiet} clean" || exit 1
+}
+
+#
+# returns 0 (true) if the zip corresponding to the current version is available, 1 (false) otherwise
+#
+function is-zip-available()
+{
+    debug-arguments $@
+    local zip_file=$1 # optional
+
+    if [ -z ${zip_file} ]; then
+        [ -z ${project_home} ] && fail "global variable 'project_home' not defined"
+        zip_file=${project_home}/target/$(get-artifact-zip-name)
+    fi
+
+    [ -f ${zip_file} ] && { debug "zip file ${zip_file} is available"; return 0; }
+    return 1
+}
+
+function build-zip()
+{
+    debug-arguments $@
+    [ -z ${project_home} ] && fail "global variable 'project_home' not defined"
+
+    local skip_tests_arg
+    ${no_tests} && skip_tests_arg="-Dmaven.test.skip=true"
+
+    local maven_quiet="-q"
+    ${verbose} && maven_quiet=""
+
+    (cd ${project_home}; mvn ${maven_quiet} clean package ${skip_tests_arg}) && debug "mvn ${maven_quiet} clean package ${skip_tests_arg}" || exit 1
+
+    local version
+    version=$(get-version) || exit 1
+    local artifact_base_name
+    artifact_base_name=$(get-artifact-base-name) || exit 1
+
+    debug "version: ${version}, artifact_base_name: ${artifact_base_name}"
+
+    mkdir -p ${project_home}/target/${artifact_base_name}-${version}/lib && debug "created directory ${project_home}/target/${artifact_base_name}-${version}/lib" || exit 1
+    mkdir ${project_home}/target/${artifact_base_name}-${version}/bin && debug "created directory ${project_home}/target/${artifact_base_name}-${version}/bin" || exit 1
+    cp ${project_home}/target/${artifact_base_name}-${version}.jar ${project_home}/target/${artifact_base_name}-${version}/lib && debug "copied ${project_home}/target/${artifact_base_name}-${version}.jar in ${project_home}/target/${artifact_base_name}-${version}/lib" || exit 1;
+    cp ${project_home}/src/main/bash/* ${project_home}/target/${artifact_base_name}-${version}/bin && debug "copied ${project_home}/src/main/bash/* in ${project_home}/target/${artifact_base_name}-${version}/bin" || exit 1;
+    configure-run-wrapper ${project_home}/target/${artifact_base_name}-${version}/bin && debug "successfully configured the run wrapper" || exit 1;
+    chmod a+rx ${project_home}/target/${artifact_base_name}-${version}/bin/* && debug "chmod a+rx ${project_home}/target/${artifact_base_name}-${version}/bin/*" || exit 1;
+    cp ${project_home}/README.md ${project_home}/target/${artifact_base_name}-${version} && debug "copied ${project_home}/README.md ${project_home}/target/${artifact_base_name}-${version}" || exit 1;
+
+    local dependencies
+    dependencies=$(get-dependencies) || exit 1
+    debug "dependencies: ${dependencies}"
+    for i in ${dependencies}; do
+        [ -f ${i} ] || fail "dependency ${i} does not exist"
+        cp ${i} ${project_home}/target/${artifact_base_name}-${version}/lib && debug "copied dependency ${i} in ${project_home}/target/${artifact_base_name}-${version}/lib" || exit 1;
+    done
+
+    local artifact_zip_name
+    artifact_zip_name=$(get-artifact-zip-name) || exit 1
+
+    local zip_quiet="-q"
+    ${verbose} && zip_quiet=""
+
+    (cd ${project_home}/target; zip ${zip_quiet} -r ${artifact_zip_name} ${artifact_base_name}-${version}) && debug "created ${project_home}/target/${artifact_base_name}-${version}.zip" || exit 1
+}
+
+#
+# gets the final location (pre-zip) of the directory containing the run wrapper, identifies the run wrapper
+# and configures it (main class, etc).
+#
+function configure-run-wrapper()
+{
+    debug-arguments $@
+
+    local bin_dir=$1
+
+    [ -z "${bin_dir}" ] && fail "'bin_dir' not provided"
+    [ -d ${bin_dir} ] || fail "'bin_dir' ${bin_dir} not a directory"
+    [ -z ${project_home} ] && fail "global variable 'project_home' not defined"
+
+    #
+    # identify the run wrapper
+    #
+
+    local run_wrapper_file
+
+    for i in $(ls ${bin_dir}); do
+        debug "looking at ${bin_dir}/${i} ..."
+        if grep -q "^main_class=\${main_class}" ${bin_dir}/${i}; then
+            [ -n "${run_wrapper_file}" ] && fail "two run wrapper files found: ${run_wrapper_file}, ${bin_dir}/${i}"
+            run_wrapper_file=${bin_dir}/${i}
+        fi
+    done
+
+    [ -z "${run_wrapper_file}" ] && fail "no run wrapper file found in ${bin_dir}"
+
+    debug "run wrapper file: ${run_wrapper_file}"
+
+    local main_class
+    main_class=$(find-main-class) || exit 1
+    debug "main_class: ${main_class}"
+    [ -z "${main_class}" ] && fail "failed to identify the main class"
+
+    local tf=${project_home}/target/sed.tmp
+    sed -e 's/^main_class=\${main_class}.*$/main_class='"${main_class}"'/' ${run_wrapper_file} > ${tf} || fail "failed to sed into ${tf}"
+    if diff ${run_wrapper_file} ${tf} > /dev/null; then
+        fail "${run_wrapper_file} and ${tf} are identical, no substitution has been made"
+    fi
+    mv ${project_home}/target/sed.tmp ${run_wrapper_file} && debug "main_class set to '${main_class}' in ${run_wrapper_file}" || fail "failed to mv ${project_home}/target/sed.tmp ${run_wrapper_file}"
+    return 0
+}
+
+#
+# heuristics to find the main class of the application. Returns the main class in the format "com.example.Main"
+#
+function find-main-class()
+{
+    [ -z ${project_home} ] && fail "global variable 'project_home' not defined"
+
+    local line
+    line=$(grep -r "public static void main" ${project_home}/src/* | head -n 1) || fail "failed to grep ${project_home}/src/*"
+    debug "line: ${line}"
+
+    [ -z "${line}" ] && fail "did not find 'public static void main' in ${project_home}/src/*"
+
+    local file
+    file=${line%%:*}
+    debug "file: ${file}"
+    [ -f ${file} ] || fail "file ${file} does not exist"
+
+    local package
+    package=$(grep "^package.*;" ${file} | sed -e 's/^package \(.*\);.*$/\1/') || fail "failed to grep/sed for package"
+    debug "package: ${package}"
+    [ -z "${package}" ] && fail "failed to identify the package name in ${file}"
+
+    local class_name
+    class_name=$(grep "^public class " ${file} | sed -e 's/^public class \(.*\)/\1/' | tr -d '\012' | tr -d '\015') || fail "failed to grep/sed for class name"
+    debug "class_name: >${class_name}<"
+    [ -z "${class_name}" ] && fail "failed to identify the class name in ${file}"
+
+    echo "${package}.${class_name}"
+}
+
+function get-dependencies()
+{
+    [ -z ${project_home} ] && fail "global variable 'project_home' not defined"
+    local maven_quiet="-q"
+    ${verbose} && maven_quiet=""
+    (cd ${project_home}; mvn ${maven_quiet} dependency:build-classpath -Dmdep.pathSeparator=" " -Dmdep.outputFile=./target/dependencies.txt 1>&2) && debug "executed mvn ${maven_quiet} dependency:build-classpath -Dmdep.pathSeparator=\" \" -Dmdep.outputFile=./target/dependencies.txt" || exit 1
+    cat ${project_home}/target/dependencies.txt
+}
+
+function install-locally()
+{
+    debug-arguments $@
+
+    local zip_file=$1
+    local installation_dir=$2 # the system directory where third-party software is installed (/opt or /usr/local)
+    local force=$3 # if not specified, defaults to "false"
+
+    [ -z ${zip_file} ] && fail "${FUNCNAME[0]}: no zip file name provided"
+    [ -z ${installation_dir} ] && fail "${FUNCNAME[0]}: no installation directory name provided"
+    [ -d ${installation_dir} ] || fail "${FUNCNAME[0]}: installation directory ${installation_dir} does not exist"
+    [ -z ${force} ] && force=false
+
+    local home_dir=${installation_dir}/$(basename ${zip_file} .zip)
+    debug "home_dir: ${home_dir}"
+
+    if [ -d ${home_dir} ]; then
+
+        ! ${force} && fail "${home_dir} already installed. Use '--force' to overwrite"
+
+        # --force was used, remove the existing directory for a clean installation
+        rm -r ${home_dir} && debug "removed existing ${home_dir}" || fail "failed to remove existing ${home_dir}"
+    fi
+
+    local unzip_quiet="-q"
+    ${verbose} && unzip_quiet=""
+
+    unzip ${unzip_quiet} ${zip_file} -d ${installation_dir} && debug "unzipped ${zip_file} into ${installation_dir}" || fail "failed to unzip ${zip_file} into ${installation_dir}"
+
+    local link_name=$(basename ${zip_file} .zip)
+    link_name=${link_name%%-*} # be prepared to handle <name>-1.0.0, <name>-1.0.0-SNAPSHOT, etc.
+    debug "link_name: ${link_name}"
+
+    if [ -h ${installation_dir}/${link_name} ]; then
+        rm ${installation_dir}/${link_name} && debug "removed existing link ${installation_dir}/${link_name}" || fail "failed to remove existing link ${installation_dir}/${link_name}"
+    fi
+
+    # prefer relative links, this increases the chance they'll work over NFS
+    (cd ${installation_dir}; ln -s ./$(basename ${home_dir}) ${link_name}) && debug "linked ./$(basename ${home_dir}) to ${link_name}" || fail "failed to link ./$(basename ${home_dir}) to ${link_name}"
+}
+
+function install-remotely()
+{
+    debug-arguments $@
+    local zip_file=$1
+    local remote_environment=$2
+    local force=$3
+    [ -z ${force} ] && force=false
+    [ -z ${project_home} ] && fail "${FUNCNAME[0]}: remote enviornment name not provided"
+    [ -z ${zip_file} ] && fail "${FUNCNAME[0]}: zip file not provided"
+    [ -f ${zip_file} ] || fail "${FUNCNAME[0]}: zip file ${zip_file} does not exist"
+    [ -z ${project_home} ] && fail "global variable 'project_home' not defined"
+
+    local environment_file=${project_home}/environments/${remote_environment}
+    [ -f ${environment_file} ] || fail "environment configuration file ${environment_file} does not exist"
+
+    local user
+    local installation_dir
+    local hosts # space separate list of resolvable host names or IPs
+
+    . ${environment_file}
+
+    [ -z ${user} ] && fail "environment ${remote_environment} incorrectly configured: 'user' not specfied in ${environment_file}"
+    [ -z ${installation_dir} ] && fail "environment ${remote_environment} incorrectly configured: 'installation_dir' not specfied in ${environment_file}"
+    [ -z ${hosts} ] && fail "environment ${remote_environment} incorrectly configured: 'hosts' not specfied in ${environment_file}"
+
+    for host in ${hosts}; do
+        install-over-ssh ${user} ${host} ${installation_dir} ${zip_file} ${force} || exit 1
+    done
+}
+
+function install-over-ssh()
+{
+    debug-arguments $@
+
+    local user=$1
+    local host=$2
+    local installation_dir=$3
+    local zip_file=$4
+    local force=$5
+    [ -z ${force} ] && force=false
+
+    debug "installing into ${user}@${host}"
+
+    [ -z ${user} ] && fail "'user' not specified"
+    [ -z ${host} ] && fail "'host' not specified"
+    [ -z ${installation_dir} ] && fail "'installation_dir' not specified"
+    [ -z ${zip_file} ] && fail "'zip_file' not specified"
+    [ -f ${zip_file} ] || fail "${zip_file} does not exist"
+
+    debug "uploading artifacts to ${user}@${host} ..."
+    scp ${zip_file} $0 ${user}@${host}:${installation_dir} && debug "" || fail "failed to scp to ${user}@${host}:${installation_dir}"
+
+    ${force} && force_flag="--force"
+    ${verbose} && verbose_flag="--verbose"
+
+    local ssh_command="ssh ${user}@${host} ${installation_dir}/$(basename $0) ${verbose_flag} --zip-file ${installation_dir}/$(basename ${zip_file}) --installation-dir ${installation_dir} ${force_flag}"
+    debug ${ssh_command}
+    ${ssh_command} && debug "ssh successful" || debug "failed to execute the remote installation script on ${user}@${host}"
+}
+
+function main()
+{
+    local force
+    local remote_environment
+    local clean=false
+    local zip_file
+    local installation_dir
+    local zip_only=false
+    while [ ! -z $1 ]; do
+        if [ $1 = "--help" ]; then help=true
+        elif [ $1 = "--verbose" -o $1 = "-v" ]; then verbose=true;
+        elif [ $1 = "--no-tests" ]; then no_tests=true;
+        elif [ $1 = "--clean" ]; then clean=true;
+        elif [ $1 = "--force" ]; then force=true;
+        elif [ $1 = "--zip-only" ]; then zip_only=true;
+        elif [ $1 = "--zip-file" ]; then shift; zip_file=$1                 # this happens on a remote host
+        elif [ $1 = "--installation-dir" ]; then shift; installation_dir=$1 # this happens on a remote host
+        elif [ -z ${remote_environment} ]; then remote_environment=$1;
+        else fail "unknown argument: $1"
+        fi
+        shift
+    done
+
+    ${help} && { usage; exit 0; }
+
+    project_home=$(dirname $0)
+
+    [ -z ${zip_file} ] && zip_file=${project_home}/target/$(get-artifact-zip-name)
+
+    ${clean} && clean;
+
+    ! is-zip-available ${zip_file} && build-zip
+
+    ${zip_only} && { echo "zip file ${zip_file} is available for distribution"; exit 0; }
+
+    if [ -z ${installation_dir} ]; then
+        [ -z "${RUNTIME_DIR}" ] && fail "no RUNTIME_DIR defined";
+        installation_dir=${RUNTIME_DIR} # this only happens locally
+    fi
+
+    if [ -z ${remote_environment} ]; then
+        install-locally ${zip_file} ${installation_dir} ${force} # this may also run remotely
+    else
+        install-remotely ${project_home}/target/$(get-artifact-zip-name) ${remote_environment} ${force}
+    fi
+}
+
+main $@
+

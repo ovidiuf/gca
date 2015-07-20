@@ -2,7 +2,9 @@
 
 #Next
 
-gca ./gc.log.04-Dec-13-020427 export -c cms-concurrent-mark-start
+* test version and release date
+
+* gca ./gc.log.04-Dec-13-020427 export -c cms-concurrent-mark-start
 
     [error]: unknown export option: cms-concurrent-mark-start
     

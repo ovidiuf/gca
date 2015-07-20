@@ -3,7 +3,6 @@ package com.novaordis.gc.cli;
 import com.novaordis.gc.cli.command.ExportCommand;
 import com.novaordis.gc.cli.command.InfoCommand;
 import com.novaordis.gc.cli.command.TestCommand;
-import com.novaordis.gc.cli.command.tccs.TimestampConversionCommand;
 import com.novaordis.gc.cli.command.VersionCommand;
 import com.novaordis.gc.cli.command.tccs.TomsCommand;
 import com.novaordis.gc.cli.command.tccs.TotsCommand;
@@ -32,7 +31,7 @@ public class CommandFactory
         }
         else if ("version".equals(name))
         {
-            return new VersionCommand(c, args);
+            return new VersionCommand(args);
         }
         else if ("info".equals(name))
         {

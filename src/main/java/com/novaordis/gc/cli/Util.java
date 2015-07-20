@@ -2,11 +2,9 @@ package com.novaordis.gc.cli;
 
 import org.apache.log4j.Logger;
 
-import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Properties;
 
 /**
  * @author <a href="mailto:ovidiu@novaordis.com">Ovidiu Feodorov</a>
@@ -15,76 +13,81 @@ import java.util.Date;
  */
 public class Util
 {
-    // Constants -------------------------------------------------------------------------------------------------------
+    // Constants ---------------------------------------------------------------------------------------------------------------------------
 
     private static final Logger log = Logger.getLogger(Util.class);
 
-    // Static ----------------------------------------------------------------------------------------------------------
+    // Static ------------------------------------------------------------------------------------------------------------------------------
 
-    public static void timeConversion() throws Exception
+    /**
+     * @return null if the metadata file is not found or there was a read failure (also a log warning is generated).
+     */
+    public static String getVersion()
     {
-        SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a");
-        Date d = format.parse("1/9/2015 5:38:02 AM");
-
-        System.out.println(format.format(d.getTime() - 23766));
+        return getReleaseMetadata("version");
     }
 
-    public static void displayContentFromClasspath(String fileName)
+    /**
+     * @return null if the metadata file is not found or there was a read failure (also a log warning is generated).
+     */
+    public static String getReleaseDate()
     {
-        BufferedReader br = null;
+        return getReleaseMetadata("release_date");
+    }
+
+    /**
+     * @return null if the metadata file is not found or there was a read failure (also a log warning is generated).
+     */
+    public static String getReleaseMetadata(String propertyName)
+    {
+        String releaseMetadataFileName = "VERSION";
+
+        ClassLoader cl = Util.class.getClassLoader();
+
+        InputStream is = cl.getResourceAsStream(releaseMetadataFileName);
+
+        if (is == null)
+        {
+            log.warn("release metadata file \"" + releaseMetadataFileName + "\" not found on the classpath");
+            return null;
+        }
+
+        Properties properties = new Properties();
 
         try
         {
-            InputStream is = Main.class.getClassLoader().getResourceAsStream(fileName);
-
-            if (is != null)
-            {
-                br = new BufferedReader(new InputStreamReader(is));
-
-                String line;
-                while((line = br.readLine()) != null)
-                {
-                    System.out.println(line);
-                }
-            }
-
-            return;
+            properties.load(is);
         }
-        catch(Exception e)
+        catch(IOException e)
         {
-            // swallow for the time being
-        }
-        finally
-        {
-            if (br != null)
-            {
-                try
-                {
-                    br.close();
-                }
-                catch(Exception e)
-                {
-                    e.printStackTrace();
-                }
-            }
+            log.warn("failed to read the release metadata file \"" + releaseMetadataFileName + "\"", e);
+            return null;
         }
 
-        System.out.println("failed to load the '" + fileName + "' file content from classpath");
+        String value = properties.getProperty(propertyName);
+
+        if (value == null)
+        {
+            log.warn("no '" + propertyName + "' property found in \"" + releaseMetadataFileName + "\"");
+            return null;
+        }
+
+        return value;
     }
 
-    // Attributes ------------------------------------------------------------------------------------------------------
+    // Attributes --------------------------------------------------------------------------------------------------------------------------
 
-    // Constructors ----------------------------------------------------------------------------------------------------
+    // Constructors ------------------------------------------------------------------------------------------------------------------------
 
-    // Public ----------------------------------------------------------------------------------------------------------
+    // Public ------------------------------------------------------------------------------------------------------------------------------
 
-    // Package protected -----------------------------------------------------------------------------------------------
+    // Package protected -------------------------------------------------------------------------------------------------------------------
 
-    // Protected -------------------------------------------------------------------------------------------------------
+    // Protected ---------------------------------------------------------------------------------------------------------------------------
 
-    // Private ---------------------------------------------------------------------------------------------------------
+    // Private -----------------------------------------------------------------------------------------------------------------------------
 
-    // Inner classes ---------------------------------------------------------------------------------------------------
+    // Inner classes -----------------------------------------------------------------------------------------------------------------------
 
 }
 
