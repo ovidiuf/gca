@@ -17,25 +17,26 @@
 
 
     git add ...
-    git commit -m "release 1.2. 327/0/0."
+    git commit -m "release 1.2. <short summary of new features>. 327/0/0."
 
-* Create the artifact and save target/gca-&lt;version&gt;.zip on the outside target system. It can be installed by unzipping in /usr/local and linking.
-
-
-    ./util/release.sh
-
-* You can install locally with:
+* Install locally
 
 
-    ./util/install-locally.sh [--force] <version>
+    ./install
 
+
+* Verify the version of the newly installed release.
+
+
+    gca version
 
 * Increment version pom.xml to a "-SNAPSHOT" version.
 
 * Check in with:
 
+
     git add ...
-    git commit -m "preparing new version"
+    git commit -m "starting ...-SNAPSHOT"
 
 
 
