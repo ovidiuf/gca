@@ -9,7 +9,7 @@
     <artifactId>gca</artifactId>
     <packaging>jar</packaging>
 
-    <version>1.2.2-SNAPSHOT</version>
+    <version>1.2.2-SNAPSHOT-1</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
